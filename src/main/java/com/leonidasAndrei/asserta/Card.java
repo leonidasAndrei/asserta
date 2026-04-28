@@ -3,10 +3,10 @@ package com.leonidasAndrei.asserta;
 public class Card {
 
     //ATTRIBUTES
-
     public enum Suit {
         SPADES, CLUBS, HEARTS, DIAMONDS
     }
+
     private Suit suit;
     private int rank;
     private String symbol;
@@ -15,7 +15,7 @@ public class Card {
 
     //CONSTRUCTORS
     public Card(Suit suit, int rank, String symbol) {
-        if(suit == null) {
+        if (suit == null) {
             throw new NullPointerException("Suit cannot be null");
         }
         validateRank(rank);
@@ -31,7 +31,7 @@ public class Card {
     }
 
     public Card(Suit suit, int rank) {
-        if(suit == null) {
+        if (suit == null) {
             throw new NullPointerException("Suit cannot be null");
         }
         validateRank(rank);
@@ -41,7 +41,7 @@ public class Card {
     }
 
     public Card(Suit suit, String symbol) {
-        if(suit == null) {
+        if (suit == null) {
             throw new NullPointerException("Suit cannot be null");
         }
         this.suit = suit;
@@ -96,5 +96,10 @@ public class Card {
 
     public void setSymbol(String symbol) {
         this.symbol = symbol;
+    }
+
+    @Override
+    public String toString() {
+        return symbol + " of " + suit;
     }
 }
