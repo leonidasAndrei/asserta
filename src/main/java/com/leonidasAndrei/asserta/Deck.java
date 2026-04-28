@@ -32,8 +32,6 @@ public class Deck {
         // Add 2 Jokers
         deck.add(new Card(null, 0));
         deck.add(new Card(null, 0));
-
-        Collections.shuffle(deck);
     }
 
     //Full or Standard deck
@@ -56,7 +54,6 @@ public class Deck {
                 deck.add(new Card(null, 0));
                 deck.add(new Card(null, 0));
             }
-            Collections.shuffle(deck);
         }
     }
 

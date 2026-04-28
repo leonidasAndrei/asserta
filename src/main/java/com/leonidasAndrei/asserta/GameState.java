@@ -5,22 +5,30 @@ import java.util.Collections;
 import java.util.List;
 
 public class GameState {
-    private List<Player> players;
+
+    //ATTRIBUTES
+    public enum GamePhase {DEALING, PLAYING, WAITING, BLUFF_CALLED, GAME_OVER}
+
+    private List<Player> activePlayers;
     private Player currentPlayer;
     private Player lastClaimer;
     private int currentPlayerIndex;
     private int declaredRank;
     private List<Card> tableCards;
     private boolean roundOver;
+    private GamePhase phase;
 
-    public GameState() {
-        this.players = new ArrayList<>();
+    //CONSTRUCTORS
+    public GameState(List <Player> players) {
+        this.activePlayers = new ArrayList<>(players);
         this.tableCards = new ArrayList<>();
         this.currentPlayer = null;
         this.lastClaimer = null;
-        this.declaredRank = 0;
+        this.declaredRank = 127;
         this.currentPlayerIndex = 0;
         this.roundOver = false;
+        phase = GamePhase.DEALING;
+
     }
 
     public GameState(
@@ -30,24 +38,27 @@ public class GameState {
             int declaredRank,
             List<Card> tableCards,
             int currentPlayerIndex,
-            boolean roundOver
+            boolean roundOver,
+            GamePhase phase
     ) {
-        this.players = players;
+        this.activePlayers = players;
         this.currentPlayer = currentPlayer;
         this.lastClaimer = lastClaimer;
         this.declaredRank = declaredRank;
         this.tableCards = tableCards;
         this.currentPlayerIndex = currentPlayerIndex;
         this.roundOver = roundOver;
+        this.phase = phase;
     }
 
-    public List<Player> getPlayers() {
-        return Collections.unmodifiableList(players);
-    }
+    //METHODS
+    public List<Player> getActivePlayers() { return Collections.unmodifiableList(activePlayers); }
 
     public Player getCurrentPlayer() {
         return currentPlayer;
     }
+
+    public void setCurrentPlayer(Player currentPlayer) { this.currentPlayer = currentPlayer; }
 
     public Player getLastClaimer() {
         return lastClaimer;
@@ -57,9 +68,13 @@ public class GameState {
         return currentPlayerIndex;
     }
 
+    public void setCurrentPlayerIndex(int currentPlayerIndex) { this.currentPlayerIndex = currentPlayerIndex; }
+
     public int getDeclaredRank() {
         return declaredRank;
     }
+
+    public void setDeclaredRank(int declaredRank) { this.declaredRank = declaredRank; }
 
     public List<Card> getTableCards() {
         return Collections.unmodifiableList(tableCards);
@@ -68,4 +83,8 @@ public class GameState {
     public boolean isRoundOver() {
         return roundOver;
     }
+
+    public GamePhase getPhase() { return phase; }
+
+    public void setPhase(GamePhase phase) { this.phase = phase; }
 }
