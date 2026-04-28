@@ -102,4 +102,21 @@ public class Card {
     public String toString() {
         return symbol + " of " + suit;
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Card)) return false;
+
+        Card card = (Card) o;
+
+        return rank == card.rank && suit == card.suit;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (suit != null ? suit.hashCode() : 0);
+        result = 31 * result + rank;
+        return result;
+    }
 }

@@ -7,11 +7,13 @@ import java.util.List;
 public class Deck {
 
     //ATTRIBUTES
-    private List<Card> deck = new ArrayList<>();
+    private List<Card> deck;
     private int type;
 
     //CONSTRUCTORS
+    //Bluff deck
     public Deck() {
+        deck = new ArrayList<>();
         Card.Suit[] suits = Card.Suit.values();
         int suitIndex = 0;
 
@@ -34,7 +36,9 @@ public class Deck {
         Collections.shuffle(deck);
     }
 
+    //Full or Standard deck
     public Deck(int type) {
+        deck = new ArrayList<>();
         if (type != 0 && type != 1) {
             throw new IllegalArgumentException("Type must be 0 (full deck) or 1 (standard deck)");
         } else {
@@ -56,6 +60,7 @@ public class Deck {
         }
     }
 
+    //METHODS
     public void shuffle() {
         if(!deck.isEmpty()) {
             Collections.shuffle(deck);
@@ -71,7 +76,7 @@ public class Deck {
     }
 
     public List<Card> getDeck() {
-        return deck;
+        return Collections.unmodifiableList(deck);
     }
 
     public boolean isEmpty() {
