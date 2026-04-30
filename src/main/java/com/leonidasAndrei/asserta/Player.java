@@ -1,7 +1,6 @@
 package com.leonidasAndrei.asserta;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class Player {
@@ -59,7 +58,7 @@ public class Player {
     }
 
     public List<Card> getHand() {
-        return Collections.unmodifiableList(hand);
+        return hand;
     }
 
     public boolean isEliminated() {

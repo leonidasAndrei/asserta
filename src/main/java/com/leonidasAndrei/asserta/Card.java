@@ -72,7 +72,7 @@ public class Card {
     }
 
     private void validateRank(int rank) {
-        if (rank < 1 || rank > 13) {
+        if (rank < 0 || rank > 13) {
             throw new IllegalArgumentException("Invalid rank: " + rank);
         }
     }

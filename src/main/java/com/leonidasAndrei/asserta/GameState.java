@@ -1,7 +1,6 @@
 package com.leonidasAndrei.asserta;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class GameState {
@@ -57,7 +56,7 @@ public class GameState {
 
     //METHODS
     public List<Player> getActivePlayers() {
-        return Collections.unmodifiableList(activePlayers);
+        return activePlayers;
     }
 
     public void setActivePlayers(List<Player> activePlayers) {
@@ -97,7 +96,7 @@ public class GameState {
     }
 
     public List<Card> getTableCards() {
-        return Collections.unmodifiableList(tableCards);
+        return tableCards;
     }
 
     public void setTableCards(List<Card> tableCards) {

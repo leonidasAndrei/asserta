@@ -30,8 +30,8 @@ public class Deck {
         }
 
         // Add 2 Jokers
-        deck.add(new Card(null, 0));
-        deck.add(new Card(null, 0));
+        deck.add(new Card(suits[0], 0));
+        deck.add(new Card(suits[2], 0));
     }
 
     //Full or Standard deck
@@ -73,7 +73,7 @@ public class Deck {
     }
 
     public List<Card> getDeck() {
-        return Collections.unmodifiableList(deck);
+        return deck;
     }
 
     public boolean isEmpty() {

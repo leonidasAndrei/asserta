@@ -17,7 +17,6 @@ public class Game {
     public Game() {
         this.players = new ArrayList<>();
         this.state = new GameState(players);
-        this.deck = new Deck();
     }
 
     //METHODS
@@ -29,6 +28,7 @@ public class Game {
 
         state.setActivePlayers(players);
 
+        deck = new Deck();
         deck.shuffle();
 
         //distribute cards
@@ -48,14 +48,14 @@ public class Game {
         state.setCurrentPlayer(players.get(rndIndex));
 
         //set the rank randomly
-        int[] ranks = {1, 11, 12, 13}; //{A, J, Q, K}
+        int[] ranks = {1, 12, 13}; //{A, Q, K}
         rndIndex = ranks[random.nextInt(ranks.length)];
         state.setDeclaredRank(rndIndex);
     }
 
     public void playTurn(List<Card> cardsPlayed) {
 
-        if(state.getTableCards().size() == 20) {
+        if (state.getTableCards().size() == 20) {
             startNewRound();
         }
 
@@ -123,7 +123,7 @@ public class Game {
 
         state.getActivePlayers().removeIf(Player::isEliminated);
 
-        if(checkWinner()) return;
+        if (checkWinner()) return;
         startNewRound();
     }
 
@@ -134,7 +134,7 @@ public class Game {
         state.setDeclaredRank(127);
         state.setLastClaimer(null);
 
-       startGame();
+        startGame();
     }
 
     public boolean checkWinner() {
@@ -147,17 +147,65 @@ public class Game {
     }
 
     public void playBotTurn() {
+
+        for (int i = 0; i < 3; i++) {
+            try {
+                System.out.println("...THINKING...");
+                Thread.sleep(1000); // 1 seconds
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+
         Player bot = state.getCurrentPlayer();
 
-        // if there are cards on table, randomly decide to call bluff
-        if (state.getNumberOfTurns() > 0 && Math.random() < 0.25) {
+        // decide whether to call bluff (only if someone already played this round)
+        if (!state.getTableCards().isEmpty() && Math.random() < 0.25) {
+            System.out.println(bot.getUsername() + " calls bluff!");
+            try {
+                System.out.println("...THINKING...");
+                Thread.sleep(1000); // 1 seconds
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
             callBluff();
             return;
         }
 
-        // otherwise play a random card from hand
-        List<Card> hand = bot.getHand();
-        Card toPlay = hand.get(new Random().nextInt(hand.size()));
-        playTurn(List.of(toPlay));
+        List<Card> hand = new ArrayList<>(bot.getHand());
+        Random random = new Random();
+
+        int maxCanPlay = Math.min(3, hand.size());
+        int numToPlay = random.nextInt(maxCanPlay) + 1;
+
+        // pick random cards from hand
+        List<Card> toPlay = new ArrayList<>();
+        for (int i = 0; i < numToPlay; i++) {
+            int idx = random.nextInt(hand.size());
+            toPlay.add(hand.get(idx));
+            hand.remove(idx); // avoid picking the same card twice
+        }
+
+        System.out.println(bot.getUsername() + " plays " + numToPlay + " " + state.getDeclaredRank() + "(s).");
+        try {
+            System.out.println("...THINKING...");
+            Thread.sleep(1000); // 1 seconds
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        playTurn(toPlay);
+    }
+
+    public GameState getState() {
+        return state;
+    }
+
+    public Deck getDeck() {
+        return deck;
+    }
+
+    public List<Player> getPlayers() {
+        return players;
     }
 }
