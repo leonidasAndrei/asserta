@@ -51,6 +51,7 @@ public class Game {
         int[] ranks = {1, 12, 13}; //{A, Q, K}
         rndIndex = ranks[random.nextInt(ranks.length)];
         state.setDeclaredRank(rndIndex);
+        state.setDeclaredSymbol(Card.rankToSymbolFull(rndIndex));
     }
 
     public void playTurn(List<Card> cardsPlayed) {
@@ -132,6 +133,7 @@ public class Game {
         state.setPhase(GamePhase.WAITING);
         state.getTableCards().clear();
         state.setDeclaredRank(127);
+        state.setDeclaredSymbol("");
         state.setLastClaimer(null);
 
         startGame();
@@ -187,13 +189,15 @@ public class Game {
             hand.remove(idx); // avoid picking the same card twice
         }
 
-        System.out.println(bot.getUsername() + " plays " + numToPlay + " " + state.getDeclaredRank() + "(s).");
+        System.out.println(bot.getUsername() + " plays " + numToPlay + " " + state.getDeclaredSymbol() + "(s).");
+
         try {
             System.out.println("...THINKING...");
             Thread.sleep(1000); // 1 seconds
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+
         playTurn(toPlay);
     }
 

@@ -10,11 +10,13 @@ public class Card {
     private Suit suit;
     private int rank;
     private String symbol;
-    private static final String[] RANKS_SYMBOLS = {"0", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
+    private String symbol_full;
+    private static final String[] RANKS_SYMBOLS = {"JOKER", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
+    private static final String[] RANKS_SYMBOLS_FULL = {"JOKER", "ACE", "2", "3", "4", "5", "6", "7", "8", "9", "10", "JACK", "QUEEN", "KING"};
 
 
     //CONSTRUCTORS
-    public Card(Suit suit, int rank, String symbol) {
+    /*public Card(Suit suit, int rank, String symbol) {
         if (suit == null) {
             throw new NullPointerException("Suit cannot be null");
         }
@@ -28,7 +30,7 @@ public class Card {
         this.suit = suit;
         this.rank = rank;
         this.symbol = symbol;
-    }
+    }*/
 
     public Card(Suit suit, int rank) {
         if (suit == null) {
@@ -38,6 +40,7 @@ public class Card {
         this.suit = suit;
         this.rank = rank;
         this.symbol = RANKS_SYMBOLS[rank];
+        this.symbol_full = RANKS_SYMBOLS_FULL[rank];
     }
 
     public Card(Suit suit, String symbol) {
@@ -47,10 +50,11 @@ public class Card {
         this.suit = suit;
         this.symbol = symbol;
         this.rank = symbolToRank(symbol);
+        this.symbol_full = RANKS_SYMBOLS_FULL[rank];
     }
 
     //METHODS
-    public int symbolToRank(String symbol) {
+    public static int symbolToRank(String symbol) {
         return switch (symbol) {
             case "A" -> 1;
             case "J" -> 11;
@@ -66,12 +70,17 @@ public class Card {
         };
     }
 
-    public String rankToSymbol(int rank) {
+    public static String rankToSymbol(int rank) {
         validateRank(rank);
         return RANKS_SYMBOLS[rank];
     }
 
-    private void validateRank(int rank) {
+    public static String rankToSymbolFull(int rank) {
+        validateRank(rank);
+        return RANKS_SYMBOLS_FULL[rank];
+    }
+
+    private static void validateRank(int rank) {
         if (rank < 0 || rank > 13) {
             throw new IllegalArgumentException("Invalid rank: " + rank);
         }
@@ -100,6 +109,7 @@ public class Card {
 
     @Override
     public String toString() {
+        if(rank == 0) return symbol;
         return symbol + " of " + suit;
     }
     

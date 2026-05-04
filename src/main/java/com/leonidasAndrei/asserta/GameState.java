@@ -13,8 +13,8 @@ public class GameState {
     private Player lastClaimer;
     private int currentPlayerIndex;
     private int declaredRank;
+    private String declaredSymbol;
     private List<Card> tableCards;
-    private boolean roundOver;
     private int numberOfTurns;
     private GamePhase phase;
 
@@ -25,8 +25,8 @@ public class GameState {
         currentPlayer = null;
         lastClaimer = null;
         declaredRank = 127;
+        declaredSymbol = "";
         currentPlayerIndex = 0;
-        roundOver = false;
         numberOfTurns = 0;
         phase = GamePhase.WAITING;
 
@@ -37,9 +37,9 @@ public class GameState {
             Player currentPlayer,
             Player lastClaimer,
             int declaredRank,
+            String declaredSymbol,
             List<Card> tableCards,
             int currentPlayerIndex,
-            boolean roundOver,
             int numberOfTurns,
             GamePhase phase
     ) {
@@ -47,9 +47,9 @@ public class GameState {
         this.currentPlayer = currentPlayer;
         this.lastClaimer = lastClaimer;
         this.declaredRank = declaredRank;
+        this.declaredSymbol = declaredSymbol;
         this.tableCards = tableCards;
         this.currentPlayerIndex = currentPlayerIndex;
-        this.roundOver = roundOver;
         this.numberOfTurns = numberOfTurns;
         this.phase = phase;
     }
@@ -95,16 +95,20 @@ public class GameState {
         this.declaredRank = declaredRank;
     }
 
+    public String getDeclaredSymbol() {
+        return declaredSymbol;
+    }
+
+    public void setDeclaredSymbol(String declaredSymbol) {
+        this.declaredSymbol = declaredSymbol;
+    }
+
     public List<Card> getTableCards() {
         return tableCards;
     }
 
     public void setTableCards(List<Card> tableCards) {
         this.tableCards = tableCards;
-    }
-
-    public boolean isRoundOver() {
-        return roundOver;
     }
 
     public int getNumberOfTurns() {
