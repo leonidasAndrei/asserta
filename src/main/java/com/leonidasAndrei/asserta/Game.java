@@ -95,15 +95,11 @@ public class Game {
 
         if (wasBluffing) {
             System.out.println(claimer.getUsername() + " was bluffing!");
-            System.out.println(claimer.getUsername() + " lost a life!");
-            claimer.loseLife();
+            handlePunishment(claimer);
         } else {
             System.out.println(caller.getUsername() + " was wrong!");
-            System.out.println(caller.getUsername() + " lost a life!");
-            caller.loseLife();
+            handlePunishment(caller);
         }
-
-        handleAfterBluff();
     }
 
     private boolean checkBluff() {
@@ -122,10 +118,33 @@ public class Game {
 
     private void handleAfterBluff() {
 
-        state.getActivePlayers().removeIf(Player::isEliminated);
+        state.getActivePlayers().removeIf(Player::isEliminated); //remove all eliminated players from activePlayers
 
         if (checkWinner()) return;
         startNewRound();
+    }
+
+    private void handlePunishment(Player loser) {
+        // set phase and randomize poisoned cup into state
+        state.setLoser(loser);
+        state.setPoisonedCup(new Random().nextInt(3) + 1);
+        state.setPhase(GamePhase.PICKING_POISON);
+    }
+
+    public void pickPoison(int chosen) {
+        Player loser = state.getLoser();
+
+        try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+
+        if (chosen == state.getPoisonedCup() - 1) {
+            System.out.println("Poisoned! " + loser.getUsername() + " loses a life!");
+            loser.loseLife();
+        }
+        else {
+            System.out.println("Safe! " + loser.getUsername() + " survives!");
+            System.out.println("(The poisoned cup was cup " + state.getPoisonedCup() + ")");
+        }
+        handleAfterBluff();
     }
 
     private void startNewRound() {
@@ -150,55 +169,112 @@ public class Game {
 
     public void playBotTurn() {
 
-        for (int i = 0; i < 3; i++) {
-            try {
-                System.out.println("...THINKING...");
-                Thread.sleep(1000); // 1 seconds
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-
+        botThink(3);
 
         Player bot = state.getCurrentPlayer();
+        Random random = new Random();
+        double smartRoll = Math.random();
 
-        // decide whether to call bluff (only if someone already played this round)
-        if (!state.getTableCards().isEmpty() && Math.random() < 0.25) {
-            System.out.println(bot.getUsername() + " calls bluff!");
+        // ── SMART MODE (smartRoll > 0.6) ─────────────────────────────────────────
+        if (smartRoll > 0.6) {
+
+            // SMART: call bluff only if table is suspicious
+            if (!state.getTableCards().isEmpty()) {
+                int maxOfRank = 6; // there are 6 Aces, 6 Kings, 6 Queens in deck
+                int tableCount = state.getTableCards().size();
+
+                // if more cards on table than exist in the whole deck → definitely bluffing
+                // if more than 4 already on table → getting very suspicious
+                boolean verysuspicious = tableCount >= maxOfRank - 1;
+                boolean slightlySuspicious = tableCount >= 3 && Math.random() < 0.5;
+
+                if (verysuspicious || slightlySuspicious) {
+                    System.out.println(bot.getUsername() + " calls bluff!");
+                    botThink(1);
+                    callBluff();
+                    return;
+                }
+            }
+
+            // SMART: prefer playing cards that actually match the declared rank
+            List<Card> hand = new ArrayList<>(bot.getHand());
+            List<Card> matchingCards = new ArrayList<>();
+            List<Card> nonMatchingCards = new ArrayList<>();
+
+            for (Card c : hand) {
+                if (c.getRank() == state.getDeclaredRank() || c.getRank() == 0) { // 0 = Joker (wild)
+                    matchingCards.add(c);
+                } else {
+                    nonMatchingCards.add(c);
+                }
+            }
+
+            List<Card> toPlay = new ArrayList<>();
+
+            if (!matchingCards.isEmpty()) {
+                // has real matching cards → play them honestly (1 to min(3, matching))
+                int numToPlay = random.nextInt(Math.min(3, matchingCards.size())) + 1;
+                for (int i = 0; i < numToPlay; i++) {
+                    int idx = random.nextInt(matchingCards.size());
+                    toPlay.add(matchingCards.get(idx));
+                    matchingCards.remove(idx);
+                }
+                /*System.out.println(bot.getUsername() + " plays " + toPlay.size() + " " + state.getDeclaredSymbol() + "(s). (honest)");*/
+            } else {
+                // no matching cards → forced to bluff, pick random non-matching
+                int numToPlay = random.nextInt(Math.min(3, nonMatchingCards.size())) + 1;
+                for (int i = 0; i < numToPlay; i++) {
+                    int idx = random.nextInt(nonMatchingCards.size());
+                    toPlay.add(nonMatchingCards.get(idx));
+                    nonMatchingCards.remove(idx);
+                }
+                /*System.out.println(bot.getUsername() + " plays " + toPlay.size() + " " + state.getDeclaredSymbol() + "(s). (forced bluff)");*/
+            }
+            System.out.println(bot.getUsername() + " plays " + toPlay.size() + " " + state.getDeclaredSymbol() + "(s).");
+
+            botThink(1);
+            playTurn(toPlay);
+
+            // ── DUMB MODE (smartRoll <= 0.6) ─────────────────────────────────────────
+        } else {
+
+            // random bluff call
+            if (!state.getTableCards().isEmpty() && Math.random() < 0.25) {
+                System.out.println(bot.getUsername() + " calls bluff!");
+                botThink(1);
+                callBluff();
+                return;
+            }
+
+            // play random cards
+            List<Card> hand = new ArrayList<>(bot.getHand());
+            int maxCanPlay = Math.min(3, hand.size());
+            int numToPlay = random.nextInt(maxCanPlay) + 1;
+
+            List<Card> toPlay = new ArrayList<>();
+            for (int i = 0; i < numToPlay; i++) {
+                int idx = random.nextInt(hand.size());
+                toPlay.add(hand.get(idx));
+                hand.remove(idx);
+            }
+
+            /*System.out.println(bot.getUsername() + " plays " + numToPlay + " " + state.getDeclaredSymbol() + "(s). (random)");*/
+            System.out.println(bot.getUsername() + " plays " + toPlay.size() + " " + state.getDeclaredSymbol() + "(s).");
+            botThink(1);
+            playTurn(toPlay);
+        }
+    }
+
+    // ── helper to avoid repeating Thread.sleep boilerplate ───────────────────────
+    private void botThink(int seconds) {
+        for (int i = 0; i < seconds; i++) {
             try {
-                System.out.println("...THINKING...");
-                Thread.sleep(1000); // 1 seconds
+                System.out.println("...");
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            callBluff();
-            return;
         }
-
-        List<Card> hand = new ArrayList<>(bot.getHand());
-        Random random = new Random();
-
-        int maxCanPlay = Math.min(3, hand.size());
-        int numToPlay = random.nextInt(maxCanPlay) + 1;
-
-        // pick random cards from hand
-        List<Card> toPlay = new ArrayList<>();
-        for (int i = 0; i < numToPlay; i++) {
-            int idx = random.nextInt(hand.size());
-            toPlay.add(hand.get(idx));
-            hand.remove(idx); // avoid picking the same card twice
-        }
-
-        System.out.println(bot.getUsername() + " plays " + numToPlay + " " + state.getDeclaredSymbol() + "(s).");
-
-        try {
-            System.out.println("...THINKING...");
-            Thread.sleep(1000); // 1 seconds
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        playTurn(toPlay);
     }
 
     public GameState getState() {

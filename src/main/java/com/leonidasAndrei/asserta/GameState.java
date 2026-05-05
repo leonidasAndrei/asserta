@@ -6,16 +6,18 @@ import java.util.List;
 public class GameState {
 
     //ATTRIBUTES
-    public enum GamePhase {DEALING, PLAYING, WAITING, BLUFF_CALLED, GAME_OVER}
+    public enum GamePhase {DEALING, PLAYING, WAITING, BLUFF_CALLED, PICKING_POISON, GAME_OVER}
 
     private List<Player> activePlayers;
     private Player currentPlayer;
     private Player lastClaimer;
+    private Player loser;
     private int currentPlayerIndex;
     private int declaredRank;
     private String declaredSymbol;
     private List<Card> tableCards;
     private int numberOfTurns;
+    private int poisonedCup;
     private GamePhase phase;
 
     //CONSTRUCTORS
@@ -24,10 +26,12 @@ public class GameState {
         tableCards = new ArrayList<>();
         currentPlayer = null;
         lastClaimer = null;
+        loser = null;
         declaredRank = 127;
         declaredSymbol = "";
         currentPlayerIndex = 0;
         numberOfTurns = 0;
+        poisonedCup = 127;
         phase = GamePhase.WAITING;
 
     }
@@ -36,21 +40,25 @@ public class GameState {
             List<Player> players,
             Player currentPlayer,
             Player lastClaimer,
+            Player loser,
             int declaredRank,
             String declaredSymbol,
             List<Card> tableCards,
             int currentPlayerIndex,
             int numberOfTurns,
+            int poisonedCup,
             GamePhase phase
     ) {
         this.activePlayers = players;
         this.currentPlayer = currentPlayer;
         this.lastClaimer = lastClaimer;
+        this.loser = loser;
         this.declaredRank = declaredRank;
         this.declaredSymbol = declaredSymbol;
         this.tableCards = tableCards;
         this.currentPlayerIndex = currentPlayerIndex;
         this.numberOfTurns = numberOfTurns;
+        this.poisonedCup = poisonedCup;
         this.phase = phase;
     }
 
@@ -78,6 +86,10 @@ public class GameState {
     public void setLastClaimer(Player lastClaimer) {
         this.lastClaimer = lastClaimer;
     }
+
+    public Player getLoser() { return loser; }
+
+    public void setLoser(Player loser) { this.loser = loser; }
 
     public int getCurrentPlayerIndex() {
         return currentPlayerIndex;
@@ -117,6 +129,13 @@ public class GameState {
 
     public void addNumberOfTurns() {
         numberOfTurns++;
+    }
+
+    public int getPoisonedCup() { return poisonedCup; }
+
+    public void setPoisonedCup(int poisonedCup) {
+        if (poisonedCup < 1 || poisonedCup > 3) throw new IllegalArgumentException("Cup must be 1, 2 or 3");
+        this.poisonedCup = poisonedCup;
     }
 
     public GamePhase getPhase() {

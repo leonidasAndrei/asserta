@@ -4,6 +4,7 @@ import com.leonidasAndrei.asserta.GameState.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
@@ -43,6 +44,31 @@ public class Main {
 
         while (game.getState().getPhase() != GamePhase.GAME_OVER) {
 
+            if (game.getState().getPhase() == GamePhase.PICKING_POISON) {
+                runSleep(1);
+                Player loser = game.getState().getLoser();
+                if (loser.isHuman()) {
+                    System.out.println("[0]  [1]  [2]");
+                    System.out.print("Pick a cup (0, 1 or 2): ");
+                    int cup = scanner.nextInt();
+                    while (cup < 0 || cup > 2) {
+                        System.out.print("Invalid. Pick 0, 1 or 2: ");
+                        cup = scanner.nextInt();
+                    }
+                    game.pickPoison(cup);
+                } else {
+                    int cup = new Random().nextInt(3);
+                    System.out.println("[0]  [1]  [2]");
+                    System.out.println("Pick a cup (0, 1 or 2): ");
+                    runSleep(1);
+                    System.out.println("...THINKING...");
+                    runSleep(2);
+                    System.out.println(loser.getUsername() + " picks cup [" + cup + "]...");
+                    game.pickPoison(cup);
+                }
+                continue;
+            }
+
             System.out.println("\n--- " + game.getState().getDeclaredSymbol() + "'s TABLE ---");
             runSleep(0.5);
             System.out.println("There are " + game.getState().getTableCards().size() + " cards on table");
@@ -55,11 +81,24 @@ public class Main {
 
             if (current.isHuman()) {
                 // WAITING = someone just played, this player must decide
+
+                System.out.println("\nYour hand:");
+                List<Card> hand = current.getHand();
+                for (int i = 0; i < hand.size(); i++) {
+                    System.out.println("  [" + i + "] " + hand.get(i));
+                }
+
                 if (game.getState().getPhase() == GamePhase.WAITING && game.getState().getNumberOfTurns() > 0) {
 
                     System.out.println("(1) --- Believe and play");
                     System.out.println("(2) --- Call bluff");
-                    choice = scanner.nextInt();
+                    choice = -1;
+                    while (choice != 1 && choice != 2) {
+                        choice = scanner.nextInt();
+                        if (choice != 1 && choice != 2) {
+                            System.out.println("Invalid choice. Type 1 or 2:");
+                        }
+                    }
 
                     if (choice == 2) {
                         runSleep(1);
@@ -68,24 +107,18 @@ public class Main {
                     }
                 }
 
-                runSleep(1);
-                System.out.println("\nYour hand:");
-                List<Card> hand = current.getHand();
-                for (int i = 0; i < hand.size(); i++) {
-                    System.out.println("  [" + i + "] " + hand.get(i));
-                }
-
                 // collect cards to play
                 List<Card> toPlay = new ArrayList<>();
+                List<Integer> selectedIndices = new ArrayList<>();
                 runSleep(0.5);
 
                 System.out.println(" - Type card index to add");
                 System.out.println(" - Type 'DONE' when finished");
                 System.out.println(" - You must play at least 1 card and maximum 3:");
                 while (toPlay.size() < 3) {
-                    String input = scanner.next();
+                    String input = scanner.next().toUpperCase();
 
-                    if (input.equals("DONE") || input.equals("done")) {
+                    if (input.equals("DONE")) {
                         if (toPlay.isEmpty()) {
                             System.out.println("You must play at least 1 card.");
                             continue;
@@ -99,13 +132,13 @@ public class Main {
                             System.out.println("Invalid index, try again.");
                             continue;
                         }
-                        Card chosen = hand.get(idx);
-                        if (toPlay.contains(chosen)) {
+                        if (selectedIndices.contains(idx)) {
                             System.out.println("Already selected that card.");
                             continue;
                         }
-                        toPlay.add(chosen);
-                        System.out.println("Added: " + chosen + " (" + toPlay.size() + " selected)");
+                        selectedIndices.add(idx);
+                        toPlay.add(hand.get(idx));
+                        System.out.println("Added: " + hand.get(idx) + " (" + toPlay.size() + " selected)");
                     } catch (NumberFormatException e) {
                         System.out.println("Type a NUMBER or 'DONE'.");
                     }
