@@ -1,4 +1,4 @@
-package com.leonidasAndrei.asserta;
+package com.leonidasAndrei.asserta.model;
 
 import java.util.ArrayList;
 import java.util.Collections;

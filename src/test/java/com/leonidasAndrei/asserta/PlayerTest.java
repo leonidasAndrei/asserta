@@ -1,5 +1,7 @@
 package com.leonidasAndrei.asserta;
 
+import com.leonidasAndrei.asserta.model.Card;
+import com.leonidasAndrei.asserta.model.Player;
 import org.junit.Test;
 import org.junit.Before;
 import static org.junit.Assert.*;

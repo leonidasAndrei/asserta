@@ -1,5 +1,7 @@
 package com.leonidasAndrei.asserta;
 
+import com.leonidasAndrei.asserta.model.Card;
+import com.leonidasAndrei.asserta.model.Deck;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import java.util.List;

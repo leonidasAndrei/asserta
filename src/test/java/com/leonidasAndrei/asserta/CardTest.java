@@ -1,8 +1,9 @@
 package com.leonidasAndrei.asserta;
 
+import com.leonidasAndrei.asserta.model.Card;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import com.leonidasAndrei.asserta.Card.*;
+import com.leonidasAndrei.asserta.model.Card.*;
 
 public class CardTest {
 /*

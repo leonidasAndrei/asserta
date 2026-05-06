@@ -1,10 +1,12 @@
 package com.leonidasAndrei.asserta;
 
+import com.leonidasAndrei.asserta.model.GameState;
+import com.leonidasAndrei.asserta.model.Player;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.List;
-import com.leonidasAndrei.asserta.GameState.*;
+import com.leonidasAndrei.asserta.model.GameState.*;
 
 public class GameStateTest {
 

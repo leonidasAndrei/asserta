@@ -1,4 +1,4 @@
-package com.leonidasAndrei.asserta;
+package com.leonidasAndrei.asserta.model;
 
 public class Card {
 

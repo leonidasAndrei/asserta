@@ -1,10 +1,10 @@
-package com.leonidasAndrei.asserta;
+package com.leonidasAndrei.asserta.model;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import com.leonidasAndrei.asserta.GameState.*;
+import com.leonidasAndrei.asserta.model.GameState.*;
 
 public class Game {
 
