@@ -6,7 +6,7 @@ import java.util.List;
 public class GameState {
 
     //ATTRIBUTES
-    public enum GamePhase {DEALING, PLAYING, WAITING, BLUFF_CALLED, PICKING_POISON, GAME_OVER}
+    public enum GamePhase {DEALING, PLAYING, WAITING, BLUFF_CALLED, PICKING_POISON, NEW_ROUND, GAME_OVER}
 
     private List<Player> activePlayers;
     private Player currentPlayer;
@@ -125,6 +125,10 @@ public class GameState {
 
     public int getNumberOfTurns() {
         return numberOfTurns;
+    }
+
+    public void setNumberOfTurns(int numberOfTurns) {
+        this.numberOfTurns = numberOfTurns;
     }
 
     public void addNumberOfTurns() {

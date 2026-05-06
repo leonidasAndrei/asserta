@@ -27,6 +27,7 @@ public class Game {
     public void startGame() {
 
         state.setActivePlayers(players);
+        state.setPhase(GamePhase.NEW_ROUND);
 
         deck = new Deck();
         deck.shuffle();
@@ -142,20 +143,20 @@ public class Game {
         }
         else {
             System.out.println("Safe! " + loser.getUsername() + " survives!");
-            System.out.println("(The poisoned cup was cup " + state.getPoisonedCup() + ")");
+            System.out.println("(The poisoned cup was cup " + (state.getPoisonedCup() - 1) + ")");
         }
         handleAfterBluff();
     }
 
     private void startNewRound() {
+        state.setPhase(GamePhase.NEW_ROUND);
+
         //reset
-        state.setPhase(GamePhase.WAITING);
         state.getTableCards().clear();
         state.setDeclaredRank(127);
         state.setDeclaredSymbol("");
         state.setLastClaimer(null);
-
-        startGame();
+        state.setNumberOfTurns(0);
     }
 
     public boolean checkWinner() {
@@ -268,8 +269,8 @@ public class Game {
     // ── helper to avoid repeating Thread.sleep boilerplate ───────────────────────
     private void botThink(int seconds) {
         for (int i = 0; i < seconds; i++) {
+            System.out.println("...");
             try {
-                System.out.println("...");
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
