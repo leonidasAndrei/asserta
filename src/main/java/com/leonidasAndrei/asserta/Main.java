@@ -86,7 +86,7 @@ public class Main {
             if (game.getState().getPhase() == GamePhase.PICKING_POISON) {
                 runSleep(1);
                 Player loser = game.getState().getLoser();
-                System.out.println("\n 🧪   🧪   🧪");
+                System.out.println("\n A    B    C ");
                 System.out.println("[0]  [1]  [2]");
 
                 if (loser.isHuman()) {
@@ -197,7 +197,7 @@ public class Main {
         }
 
         // ── GAME OVER ─────────────────────────────────────────────────────────
-        System.out.println("\n🏆 Game over!");
+        System.out.println("\nGAME OVER!");
     }
 
     public static void runSleep(double seconds) {

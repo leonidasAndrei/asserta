@@ -1,0 +1,39 @@
+.root {
+    -primary-yellow: #FFDE42;
+    -primary-yellow-sel: #FFCF00;
+    -moss-green: #4C5C2D;
+    -dark-forest: #313E17;
+    -deep-espresso: #1B0C0C;
+}
+
+.button {
+    -fx-padding: 20px;
+    -fx-min-width: 200px;
+    -fx-min-height: 70px;
+    -fx-font-family: 'Arcade Normal';
+    -fx-font-size: 10pt;
+    -fx-text-fill: black;
+    -fx-background-color: -primary-yellow;
+
+}
+
+.button:hover {
+    -fx-font-size: 13pt;
+    -fx-background-color: -primary-yellow-sel;
+}
+
+.main-window {
+    -fx-background-color: -deep-espresso;
+}
+
+.title-label {
+    -fx-font-family: 'Arcade Interlaced';
+    -fx-text-fill: white;
+    -fx-font-size: 76pt;
+    -fx-padding: 10px 15px;
+}
+
+.glow {
+    -fx-effect: dropshadow(gaussian, #c9a84c, 30, 0.6, 0, 0);
+
+}
