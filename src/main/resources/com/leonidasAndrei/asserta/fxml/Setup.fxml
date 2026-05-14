@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.leonidasAndrei.asserta.controller.SetupController"
+            prefHeight="720" prefWidth="1280"
+            styleClass="main-window">
+
+    <top>
+        <BorderPane>
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+
+            <!-- BACK BUTTON (left) -->
+            <left>
+                <Button text="&lt;" onAction="#onBackClicked"
+                        styleClass="menu-button, utility-btn"/>
+            </left>
+
+            <!-- TITLE (center) -->
+            <center>
+                <Label text="MATCH SETUP" styleClass="title-label, glow"/>
+            </center>
+        </BorderPane>
+    </top>
+
+    <center>
+        <VBox alignment="CENTER" spacing="20">
+
+            <VBox fx:id="nameFieldsBox"
+                  spacing="20"
+                  alignment="CENTER"/>
+
+            <Button fx:id="addPlayerButton"
+                    text="+"
+                    onAction="#onAddPlayerClicked"
+                    styleClass="menu-button"/>
+
+            <Label fx:id="errorLabel" styleClass="error-label"/>
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+
+            <Button text="START"
+                    onAction="#onStartClicked"
+                    styleClass="menu-button, success-btn"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

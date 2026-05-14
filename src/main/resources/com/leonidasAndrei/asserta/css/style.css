@@ -1,6 +1,7 @@
 .root {
     -primary-yellow: #FFDE42;
     -primary-yellow-sel: #FFCF00;
+    -bamboo-green: #748C45;
     -moss-green: #4C5C2D;
     -dark-forest: #313E17;
     -deep-espresso: #1B0C0C;
@@ -14,7 +15,6 @@
     -fx-font-size: 10pt;
     -fx-text-fill: black;
     -fx-background-color: -primary-yellow;
-
 }
 
 .button:hover {
@@ -28,12 +28,51 @@
 
 .title-label {
     -fx-font-family: 'Arcade Interlaced';
-    -fx-text-fill: white;
+    -fx-text-fill: -primary-yellow;
     -fx-font-size: 76pt;
     -fx-padding: 10px 15px;
 }
 
+.name-field {
+    -fx-max-height: 70px;
+    -fx-min-width: 500px;
+    -fx-background-color: -dark-forest;
+    -fx-text-fill: -primary-yellow;
+    -fx-prompt-text-fill: white;
+    -fx-font-family: "Arcade Normal";
+    -fx-font-size: 13pt;
+}
+
+.name-field:focused {
+    -fx-background-color: -moss-green;
+}
+
 .glow {
     -fx-effect: dropshadow(gaussian, #c9a84c, 30, 0.6, 0, 0);
+}
 
+.utility-btn {
+    -fx-min-width: 50px;
+    -fx-min-height: 50px;
+    -fx-pref-width: 50px;
+    -fx-pref-height: 50px;
+    -fx-max-width: 50px;
+    -fx-max-height: 50px;
+
+    -fx-padding: 0;
+}
+
+.success-btn {
+    -fx-background-color: -bamboo-green;
+    -fx-text-fill: white;
+}
+
+
+.success-btn:hover {
+    -fx-background-color: -moss-green;
+    -fx-text-fill: white;
+}
+
+.error-label {
+    -fx-text-fill: red;
 }

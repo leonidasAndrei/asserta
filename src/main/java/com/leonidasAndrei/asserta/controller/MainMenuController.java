@@ -1,5 +1,6 @@
 package com.leonidasAndrei.asserta.controller;
 
+import com.leonidasAndrei.asserta.App;
 import javafx.animation.ScaleTransition;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -11,7 +12,7 @@ public class MainMenuController {
 
     @FXML
     public void onPlayClicked() throws IOException {
-        System.out.println("Play");
+        App.switchScene("Setup");
     }
 
     @FXML
