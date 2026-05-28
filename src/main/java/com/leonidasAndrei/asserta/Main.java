@@ -2,7 +2,7 @@ package com.leonidasAndrei.asserta;
 
 import com.leonidasAndrei.asserta.model.Card;
 import com.leonidasAndrei.asserta.model.Game;
-import com.leonidasAndrei.asserta.model.GameState.*;
+import com.leonidasAndrei.asserta.model.GamePhase;
 import com.leonidasAndrei.asserta.model.Player;
 
 import java.util.ArrayList;

@@ -6,7 +6,6 @@ import java.util.List;
 public class GameState {
 
     //ATTRIBUTES
-    public enum GamePhase {DEALING, PLAYING, WAITING, BLUFF_CALLED, PICKING_POISON, NEW_ROUND, GAME_OVER}
 
     private List<Player> activePlayers;
     private Player currentPlayer;

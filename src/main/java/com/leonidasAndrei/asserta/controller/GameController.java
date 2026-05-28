@@ -3,7 +3,7 @@ package com.leonidasAndrei.asserta.controller;
 import com.leonidasAndrei.asserta.App;
 import com.leonidasAndrei.asserta.model.Card;
 import com.leonidasAndrei.asserta.model.Game;
-import com.leonidasAndrei.asserta.model.GameState.GamePhase;
+import com.leonidasAndrei.asserta.model.GamePhase;
 import com.leonidasAndrei.asserta.model.Player;
 import javafx.animation.*;
 import javafx.application.Platform;
