@@ -19,6 +19,7 @@ public class GameState {
     private int numberOfTurns;
     private int poisonedCup;
     private GamePhase phase;
+    private int round;
 
     //CONSTRUCTORS
     public GameState(List<Player> players) {
@@ -33,7 +34,7 @@ public class GameState {
         numberOfTurns = 0;
         poisonedCup = 127;
         phase = GamePhase.WAITING;
-
+        round = 0;
     }
 
     public GameState(
@@ -47,7 +48,8 @@ public class GameState {
             int currentPlayerIndex,
             int numberOfTurns,
             int poisonedCup,
-            GamePhase phase
+            GamePhase phase,
+            int round
     ) {
         this.activePlayers = players;
         this.currentPlayer = currentPlayer;
@@ -60,6 +62,7 @@ public class GameState {
         this.numberOfTurns = numberOfTurns;
         this.poisonedCup = poisonedCup;
         this.phase = phase;
+        this.round = round;
     }
 
     //METHODS
@@ -150,5 +153,11 @@ public class GameState {
         this.phase = phase;
     }
 
+    public int getRound() {
+        return round;
+    }
 
+    public void addRound() {
+        round++;
+    }
 }

@@ -8,7 +8,7 @@
       fx:controller="com.leonidasAndrei.asserta.controller.MainMenuController"
       alignment="CENTER"
       spacing="24"
-      prefHeight="720" prefWidth="1280"
+      prefHeight="960" prefWidth="1280"
       styleClass="main-window"
 >
 

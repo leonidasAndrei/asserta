@@ -1,5 +1,6 @@
 package com.leonidasAndrei.asserta;
 
+import com.leonidasAndrei.asserta.controller.GameController;
 import com.leonidasAndrei.asserta.model.Game;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -51,6 +52,10 @@ public class App extends Application {
         );
 
         //Initialise game
+        Object controller = loader.getController();
+        if (controller instanceof GameController gc) {
+            gc.initGame(game);
+        }
 
         primary.setScene(scene);
     }

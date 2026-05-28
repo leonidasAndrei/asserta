@@ -15,6 +15,7 @@
     -fx-font-size: 10pt;
     -fx-text-fill: black;
     -fx-background-color: -primary-yellow;
+    -fx-cursor: hand;
 }
 
 .button:hover {
@@ -64,15 +65,162 @@
 
 .success-btn {
     -fx-background-color: -bamboo-green;
-    -fx-text-fill: white;
+    -fx-text-fill: black;
 }
 
 
 .success-btn:hover {
     -fx-background-color: -moss-green;
-    -fx-text-fill: white;
+    -fx-text-fill: black;
 }
 
 .error-label {
     -fx-text-fill: red;
+}
+
+.error-glow {
+    -fx-text-fill: #ff3333;
+    -fx-effect: dropshadow(gaussian, #ff0000, 35, 0.75, 0, 0);
+}
+
+
+/*GAME*/
+
+#rootPane {
+    -fx-background-color: #080808;
+}
+
+#tableFelt {
+    -fx-background-color: #0c3018;
+    -fx-background-radius: 130;
+    -fx-border-color: #1a5230;
+    -fx-border-width: 6;
+    -fx-border-radius: 130;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.95), 50, 0.5, 0, 10);
+}
+
+#tableRing {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(26, 82, 48, 0.35);
+    -fx-border-width: 2;
+    -fx-border-radius: 115;
+}
+
+#roundLabel {
+    -fx-font-size: 15px;
+    -fx-text-fill: rgba(150, 150, 150, 0.6);
+    -fx-font-weight: bold;
+    -fx-font-family: 'Arcade Normal';
+}
+
+#declaredRankLabel {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1a5230;
+    -fx-font-family: 'Arcade Normal';
+}
+
+#bluffLabel {
+    -fx-font-size: 56px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffc4c4;
+    -fx-effect: dropshadow(gaussian, #ff0000, 35, 0.75, 0, 0);
+}
+
+#announcementLabel {
+    -fx-font-size: 46px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e8d5b7;
+    -fx-effect: dropshadow(gaussian, #c9a84c, 20, 0.6, 0, 0);
+}
+
+#callBluffButton {
+    -fx-background-color: #180808;
+    -fx-text-fill: #ff6666;
+    -fx-border-color: #cc3333;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 20;
+    -fx-cursor: hand;
+}
+
+#playButton {
+    -fx-background-color: #081408;
+    -fx-text-fill: #88cc88;
+    -fx-border-color: #336633;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 20;
+    -fx-cursor: hand;
+}
+
+.seat-box {
+    -fx-background-color: transparent;
+    -fx-alignment: center;
+}
+
+.name-label-node {
+    -fx-font-family: "Arcade Normal";
+    -fx-font-size: 11px;
+    -fx-padding: 6px 14px;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+}
+
+.name-node-inactive {
+    -fx-text-fill: #888888;
+    -fx-background-color: #121212;
+    -fx-border-color: #333333;
+    -fx-border-width: 1px;
+}
+
+.name-node-active {
+    -fx-text-fill: #000000;
+    -fx-background-color: #FFDE42;
+    -fx-border-color: #FFCF00;
+    -fx-border-width: 1.5px;
+    -fx-effect: dropshadow(gaussian, #FFDE42, 20, 0.55, 0, 0);
+}
+
+.seat-box-active {
+    -fx-effect: dropshadow(gaussian, #FFDE42, 25, 0.5, 0, 0);
+}
+
+/* ── HUMAN HAND CARD CONTAINERS & SELECTION EFFECTS ── */
+.card-container {
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-padding: 2px; /* Leaves clean spacing for selection borders */
+    -fx-cursor: hand;
+}
+
+.card-style-default {
+    -fx-border-color: transparent;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.4), 6, 0, 0, 2);
+}
+
+.card-style-hover {
+    -fx-border-color: rgba(255, 222, 66, 0.4);
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(three-pass-box, rgba(255, 222, 66, 0.3), 10, 0, 0, 0);
+}
+
+.card-style-selected {
+    -fx-border-color: #FFDE42;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(three-pass-box, #FFDE42, 16, 0.45, 0, 0);
+}
+
+#settingsButton {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c9a84c;
+    -fx-font-size: 28px;
+    -fx-padding: 0;
 }
