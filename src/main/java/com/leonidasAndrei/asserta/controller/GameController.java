@@ -8,7 +8,9 @@ import com.leonidasAndrei.asserta.model.Player;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -46,17 +48,25 @@ public class GameController {
     private Game game;
     private final List<Card> selectedCards = new ArrayList<>();
     private boolean isDealingAnimationRunning = false;
-    private boolean isInitialStartDone = false; // Prevents the initial Round 0 loop
+    private boolean isInitialStartDone = false;
+    private String lastActionMessage = "";
+    private Timeline messageTimer;
 
-    private static final double DECK_CX     = 640;
-    private static final double DECK_CY     = 480;
+    private static final double DECK_CX = 640;
+    private static final double DECK_CY = 480;
 
     // ── INIT ──────────────────────────────────────────────────────────────────
     public void initGame(Game game) {
         this.game = game;
         this.selectedCards.clear();
         this.isDealingAnimationRunning = false;
-        this.isInitialStartDone = false; // Reset state tracking for a new game window
+        this.isInitialStartDone = false;
+        this.lastActionMessage = "";
+        if (messageTimer != null) {
+            messageTimer.stop();
+        }
+
+        seatsPane.getChildren().clear();
 
         updateUI();
     }
@@ -65,30 +75,27 @@ public class GameController {
     public void updateUI() {
         if (game == null) return;
 
-        // FIX 1: Safely catch Round 0 exactly once without creating an infinite loop
         if (game.getState().getRound() == 0 && !isInitialStartDone) {
             isInitialStartDone = true;
             startNewRoundSequence();
             return;
         }
 
-        GamePhase phase   = game.getState().getPhase();
-        Player    current = game.getState().getCurrentPlayer();
-        String    rank    = game.getState().getDeclaredSymbol();
+        GamePhase phase = game.getState().getPhase();
+        Player current = game.getState().getCurrentPlayer();
+        String rank = game.getState().getDeclaredSymbol();
 
         declaredRankLabel.setText(rank.isEmpty() ? "" : rank.toUpperCase() + "'S TABLE");
         roundLabel.setText("ROUND " + (game.getState().getRound() + 1));
-        messageLabel.setText("");
+        messageLabel.setText(lastActionMessage);
 
         renderDeckZone();
         renderSeatsExcludingCards(isDealingAnimationRunning);
         renderHumanHand();
 
         boolean isHumanTurn = current != null && current.isHuman();
-        boolean canBluff    = phase == GamePhase.WAITING && game.getState().getNumberOfTurns() > 0;
+        boolean canBluff = phase == GamePhase.WAITING && game.getState().getNumberOfTurns() > 0;
 
-        // FIX 2: Keep the action bar (your hand container) visible during bot turns.
-        // Only hide it completely while cards are actively flying through the air.
         actionBar.setVisible(!isDealingAnimationRunning);
         callBluffButton.setVisible(!isDealingAnimationRunning && isHumanTurn && canBluff);
         playButton.setVisible(!isDealingAnimationRunning && isHumanTurn);
@@ -96,21 +103,30 @@ public class GameController {
 
         switch (phase) {
             case NEW_ROUND -> {
+                cupModal.setVisible(false);
                 if (!isDealingAnimationRunning) {
                     startNewRoundSequence();
                 }
             }
+            case PICKING_POISON -> {
+                Player loser = game.getState().getLoser();
+                if (loser != null && !cupModal.isVisible()) {
+                    showCupModal(loser);
+                }
+            }
             case GAME_OVER -> {
-                try { App.switchScene("GameOver", game); }
-                catch (IOException e) { e.printStackTrace(); }
+                System.out.println("GAME OVER!!!!");
+                cupModal.setVisible(false);
+                try {
+                    App.switchScene("GameOver", game);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
             default -> {
-                if (current != null && !current.isHuman() && phase != GamePhase.PICKING_POISON && !isDealingAnimationRunning) {
+                cupModal.setVisible(false);
+                if (current != null && !current.isHuman() && !isDealingAnimationRunning) {
                     handleBotTurn();
-                }
-                if (phase == GamePhase.PICKING_POISON && !isDealingAnimationRunning) {
-                    Player loser = game.getState().getLoser();
-                    if (loser != null && !loser.isHuman()) handleBotPoisonPick();
                 }
             }
         }
@@ -119,23 +135,20 @@ public class GameController {
     // ── CONTROLLED SEQUENCING ─────────────────────────────────────────────────
     private void startNewRoundSequence() {
         selectedCards.clear();
+        lastActionMessage = "";
+        if (messageTimer != null) {
+            messageTimer.stop();
+        }
         isDealingAnimationRunning = true;
 
-        // Force buttons away instantly so they can't be clicked during the 600ms pre-delay
         actionBar.setVisible(false);
         callBluffButton.setVisible(false);
         playButton.setVisible(false);
 
         runDelayed(() -> {
-            // 1. Initialize backend game engine states and deal cards
             game.startGame();
-
-            // 2. Play the visual splash overlays cleanly
             showRoundAnnouncement(() -> {
-
-                // 3. Play the staggered flying card nodes
                 animateCardDistribution(() -> {
-                    // 4. Once animation completes fully, open UI and let bots act
                     isDealingAnimationRunning = false;
                     updateUI();
                 });
@@ -151,17 +164,18 @@ public class GameController {
         if (table.isEmpty()) {
             Rectangle r = new Rectangle(96, 136);
             r.setFill(Color.TRANSPARENT);
-            r.setStroke(Color.web("#748C45"));
+            r.setStroke(Color.web("#1a5230"));
             r.setStrokeWidth(2);
             r.getStrokeDashArray().addAll(8.0, 5.0);
-            r.setArcWidth(8); r.setArcHeight(8);
+            r.setArcWidth(8);
+            r.setArcHeight(8);
             deckZone.getChildren().add(r);
             return;
         }
 
-        double[] rots = {-18, 12, -8, 22,-15,  5,-25, 17, -6, 20,-12,  9};
-        double[] txs  = { -8,  6, -3, 10, -6,  2,-11,  7, -2,  9, -5,  4};
-        double[] tys  = {  4, -7,  9, -4,  7,-10,  3, -8, 11, -3,  6, -9};
+        double[] rots = {-18, 12, -8, 22, -15, 5, -25, 17, -6, 20, -12, 9};
+        double[] txs = {-8, 6, -3, 10, -6, 2, -11, 7, -2, 9, -5, 4};
+        double[] tys = {4, -7, 9, -4, 7, -10, 3, -8, 11, -3, 6, -9};
         int layers = Math.min(table.size(), rots.length);
 
         for (int i = 0; i < layers; i++) {
@@ -174,62 +188,91 @@ public class GameController {
         }
     }
 
-    // ── SEATS ─────────────────────────────────────────────────────────────────
+    // ── SEATS (PERSISTENT NODE DESIGN) ────────────────────────────────────────
     private void renderSeatsExcludingCards(boolean hideAllCards) {
-        seatsPane.getChildren().clear();
         List<Player> ordered = humanFirst(game.getState().getActivePlayers());
         Player current = game.getState().getCurrentPlayer();
 
         double boxWidth = 240;
         double boxHeight = 110;
 
-        for (int i = 0; i < ordered.size() && i < 4; i++) {
-            Player  p        = ordered.get(i);
-            boolean isActive = p.equals(current);
-            boolean isHuman  = p.isHuman();
-            boolean isTop    = (i == 2);
-            boolean isLeft   = (i == 1);
-            boolean isRight  = (i == 3);
+        if (seatsPane.getChildren().isEmpty()) {
+            for (int i = 0; i < ordered.size() && i < 4; i++) {
+                Player p = ordered.get(i);
+                VBox seat = new VBox(6);
+                seat.setAlignment(Pos.CENTER);
+                seat.getStyleClass().add("seat-box");
 
-            Label name  = makeNameLabel(p.getUsername(), isActive);
-            HBox  cards = (isHuman || hideAllCards) ? new HBox() : makeBotCards(p);
+                seat.setMinWidth(boxWidth);
+                seat.setPrefWidth(boxWidth);
+                seat.setMaxWidth(boxWidth);
+                seat.setMinHeight(boxHeight);
+                seat.setPrefHeight(boxHeight);
+                seat.setMaxHeight(boxHeight);
+                seat.setUserData(p); // Anchor player identification directly inside node metadata memory
 
-            VBox seat = new VBox(6);
-            seat.setAlignment(Pos.CENTER);
-            seat.getStyleClass().add("seat-box");
-
-            seat.setMinWidth(boxWidth);   seat.setPrefWidth(boxWidth);   seat.setMaxWidth(boxWidth);
-            seat.setMinHeight(boxHeight); seat.setPrefHeight(boxHeight); seat.setMaxHeight(boxHeight);
-
-            if (isHuman) {
-                seat.getChildren().add(name);
-            } else if (isTop) {
-                seat.getChildren().addAll(name, cards);
-            } else {
-                seat.getChildren().addAll(cards, name);
+                if (i == 1) { // Left
+                    seat.setRotate(90);
+                    seat.setLayoutX(130 - (boxWidth / 2));
+                    seat.setLayoutY(480 - (boxHeight / 2));
+                } else if (i == 3) { // Right
+                    seat.setRotate(-90);
+                    seat.setLayoutX(1150 - (boxWidth / 2));
+                    seat.setLayoutY(480 - (boxHeight / 2));
+                } else if (i == 2) { // Top
+                    seat.setLayoutX(640 - (boxWidth / 2));
+                    seat.setLayoutY(85 - (boxHeight / 2));
+                } else { // Bottom (Human)
+                    seat.setLayoutX(640 - (boxWidth / 2));
+                    seat.setLayoutY(932 - (boxHeight / 2));
+                }
+                seatsPane.getChildren().add(seat);
             }
+        }
 
-            if (isActive && !hideAllCards) {
-                seat.getStyleClass().add("seat-box-active");
-                pulseNode(seat);
-            }
+        for (Node node : seatsPane.getChildren()) {
+            if (node instanceof VBox seat) {
+                Player p = (Player) seat.getUserData();
+                boolean isEliminated = p.isEliminated();
+                boolean isActive = p.equals(current) && !isEliminated;
+                boolean isHuman = p.isHuman();
 
-            if (isLeft) {
-                seat.setRotate(90);
-                seat.setLayoutX(130 - (boxWidth / 2));
-                seat.setLayoutY(480 - (boxHeight / 2));
-            } else if (isRight) {
-                seat.setRotate(-90);
-                seat.setLayoutX(1150 - (boxWidth / 2));
-                seat.setLayoutY(480 - (boxHeight / 2));
-            } else if (isTop) {
-                seat.setLayoutX(640 - (boxWidth / 2));
-                seat.setLayoutY(85 - (boxHeight / 2));
-            } else {
-                seat.setLayoutX(640 - (boxWidth / 2));
-                seat.setLayoutY(932 - (boxHeight / 2));
+                int index = seatsPane.getChildren().indexOf(seat);
+                boolean isTop = (index == 2);
+
+                // Clear layout contents cleanly before refreshing states
+                seat.getChildren().clear();
+                seat.getStyleClass().remove("seat-box-active");
+
+                String displayName = p.getUsername().toUpperCase() + (isEliminated ? " (OUT)" : "");
+                Label name = makeNameLabel(displayName, isActive);
+
+                if (isEliminated) {
+                    name.getStyleClass().removeAll("name-node-active", "name-node-inactive");
+                    name.setStyle("-fx-text-fill: #555555; -fx-background-color: #222222;");
+                    seat.setOpacity(0.35);
+                } else {
+                    seat.setOpacity(1.0);
+                }
+
+                HBox cards = (isHuman || hideAllCards || isEliminated) ? new HBox() : makeBotCards(p);
+
+                if (isHuman) {
+                    seat.getChildren().add(name);
+                } else if (isTop) {
+                    seat.getChildren().addAll(name, cards);
+                } else {
+                    seat.getChildren().addAll(cards, name);
+                }
+
+                // If active, pulse. Otherwise, ensure it stops completely.
+                if (isActive && !hideAllCards) {
+                    seat.getStyleClass().add("seat-box-active");
+                    pulseNode(seat);
+                } else {
+                    stopPulseNode(seat);
+                }
             }
-            seatsPane.getChildren().add(seat);
         }
     }
 
@@ -315,10 +358,12 @@ public class GameController {
         for (int i = 0; i < ordered.size(); i++) {
             Player p = ordered.get(i);
             int handSize = p.getHand().size();
-            double[] targetPos = getBotSeatScenePosition(i);
 
-            double targetWidth = (i == 0) ? 96 : 48;
-            double targetHeight = (i == 0) ? 136 : 68;
+            int seatIndex = getPlayerSeatIndex(p);
+            double[] targetPos = getBotSeatScenePosition(seatIndex);
+
+            double targetWidth = (seatIndex == 0) ? 96 : 48;
+            double targetHeight = (seatIndex == 0) ? 136 : 68;
 
             for (int c = 0; c < handSize; c++) {
                 final double tw = targetWidth;
@@ -336,7 +381,8 @@ public class GameController {
                     rootPane.getChildren().add(dealingCard);
 
                     TranslateTransition fly = new TranslateTransition(Duration.millis(320), dealingCard);
-                    fly.setFromX(0); fly.setFromY(0);
+                    fly.setFromX(0);
+                    fly.setFromY(0);
                     fly.setToX(tx - DECK_CX);
                     fly.setToY(ty - DECK_CY);
 
@@ -365,11 +411,10 @@ public class GameController {
 
     private void showRoundAnnouncement(Runnable after) {
         String rank = game.getState().getDeclaredSymbol();
-        announcementLabel.setText("⚔  " + rank.toUpperCase() + "'S TABLE  ⚔");
+        announcementLabel.setText(rank.toUpperCase() + "'S TABLE");
         announcementOverlay.setOpacity(0);
         announcementOverlay.setVisible(true);
 
-        // Standard sequence layout
         FadeTransition fadeIn = new FadeTransition(Duration.millis(400), announcementOverlay);
         fadeIn.setToValue(1.0);
         fadeIn.setOnFinished(e -> runDelayed(() -> {
@@ -391,8 +436,10 @@ public class GameController {
         FadeTransition fadeIn = new FadeTransition(Duration.millis(250), bluffOverlay);
         fadeIn.setToValue(1.0);
         ScaleTransition scale = new ScaleTransition(Duration.millis(250), bluffLabel);
-        scale.setFromX(0.4); scale.setToX(1.0);
-        scale.setFromY(0.4); scale.setToY(1.0);
+        scale.setFromX(0.4);
+        scale.setToX(1.0);
+        scale.setFromY(0.4);
+        scale.setToY(1.0);
 
         ParallelTransition show = new ParallelTransition(fadeIn, scale);
         show.setOnFinished(e -> runDelayed(() -> {
@@ -408,16 +455,40 @@ public class GameController {
     }
 
     private void pulseNode(VBox node) {
+        // Prevent stacking duplicate animations on the same node
+        ScaleTransition existing = (ScaleTransition) node.getProperties().get("active-pulse");
+        if (existing != null) {
+            return;
+        }
+
         ScaleTransition st = new ScaleTransition(Duration.millis(900), node);
-        st.setFromX(1.0);  st.setToX(1.04);
-        st.setFromY(1.0);  st.setToY(1.04);
+        st.setFromX(1.0);
+        st.setToX(1.04);
+        st.setFromY(1.0);
+        st.setToY(1.04);
         st.setAutoReverse(true);
         st.setCycleCount(Animation.INDEFINITE);
+
+        node.getProperties().put("active-pulse", st);
         st.play();
     }
 
+    private void stopPulseNode(VBox node) {
+        ScaleTransition existing = (ScaleTransition) node.getProperties().get("active-pulse");
+        if (existing != null) {
+            existing.stop();
+            node.getProperties().remove("active-pulse");
+        }
+        // Force the scale cleanly back to normal size
+        node.setScaleX(1.0);
+        node.setScaleY(1.0);
+    }
+
     private void animateGhostsToDeck(List<double[]> sourcePositions, Runnable after) {
-        if (sourcePositions.isEmpty()) { after.run(); return; }
+        if (sourcePositions.isEmpty()) {
+            after.run();
+            return;
+        }
         int[] done = {0};
 
         for (double[] pos : sourcePositions) {
@@ -438,7 +509,8 @@ public class GameController {
             fade.setToValue(0.1);
 
             ScaleTransition shrink = new ScaleTransition(Duration.millis(380), ghost);
-            shrink.setToX(0.4); shrink.setToY(0.4);
+            shrink.setToX(0.4);
+            shrink.setToY(0.4);
 
             ParallelTransition anim = new ParallelTransition(fly, fade, shrink);
             anim.setOnFinished(e -> {
@@ -457,7 +529,7 @@ public class GameController {
                 if (toPlay.stream().anyMatch(t -> t == c)) {
                     var b = sp.localToScene(sp.getBoundsInLocal());
                     positions.add(new double[]{
-                            b.getMinX() + b.getWidth()  / 2,
+                            b.getMinX() + b.getWidth() / 2,
                             b.getMinY() + b.getHeight() / 2
                     });
                 }
@@ -468,8 +540,8 @@ public class GameController {
 
     private double[] getBotSeatScenePosition(int seatIndex) {
         return switch (seatIndex) {
-            case 1 -> new double[]{130,  480};
-            case 2 -> new double[]{640,  85};
+            case 1 -> new double[]{130, 480};
+            case 2 -> new double[]{640, 85};
             case 3 -> new double[]{1150, 480};
             default -> new double[]{640, 770};
         };
@@ -483,6 +555,11 @@ public class GameController {
         selectedCards.clear();
         playButton.setDisable(true);
 
+        Player current = game.getState().getCurrentPlayer();
+        String name = (current != null) ? current.getUsername().toUpperCase() : "PLAYER";
+        String rank = game.getState().getDeclaredSymbol().toUpperCase();
+        startActionMessageTimer(name + " PLAYS " + toPlay.size() + " " + rank + "(s)");
+
         List<double[]> positions = getHandCardPositions(toPlay);
 
         animateGhostsToDeck(positions, () -> {
@@ -495,50 +572,120 @@ public class GameController {
     public void onCallBluffClicked() {
         showBluffAlert(() -> {
             game.callBluff();
-            Player loser = game.getState().getLoser();
-            if (loser != null) showCupModal(loser);
-            else updateUI();
+            updateUI();
         });
     }
 
-    @FXML public void onWrongClicked() {
-        cupModal.setVisible(false);
-        game.pickPoison(game.getState().getPoisonedCup());
-        updateUI();
-    }
-
-    @FXML public void onRightClicked() {
-        cupModal.setVisible(false);
-        game.pickPoison((game.getState().getPoisonedCup() + 1) % 3);
-        updateUI();
-    }
-
+    // ── DYNAMIC CUP MODAL LOGIC ───────────────────────────────────────────────
     private void showCupModal(Player loser) {
-        cupModalTitle.setText(
-                "\"" + loser.getUsername().toUpperCase() + "\" GOT CAUGHT BLUFFING!\n" +
-                        "CHOOSE THEIR CONSEQUENCE CUP CAREFULLY:"
-        );
+        cupModalTitle.setText("\"" + loser.getUsername().toUpperCase() + "\" WAS WRONG!\n" + "SELECT A CUP TO DRINK CONSEQUENCES:");
+
+        VBox layoutContainer = null;
+        for (Node node : cupModal.getChildren()) {
+            if (node instanceof VBox) {
+                layoutContainer = (VBox) node;
+                break;
+            }
+        }
+        if (layoutContainer == null) {
+            layoutContainer = new VBox(24);
+            layoutContainer.setAlignment(Pos.CENTER);
+            cupModal.getChildren().add(layoutContainer);
+        }
+
+        layoutContainer.getChildren().clear();
+        layoutContainer.getChildren().add(cupModalTitle);
+
+        // Evenly spaced out layout row with custom padding around the bottles
+        HBox cupsRow = new HBox(50);
+        cupsRow.setAlignment(Pos.CENTER);
+        cupsRow.setPadding(new Insets(20, 40, 20, 40));
+
+        for (int i = 1; i < 4; i++) {
+            final int index = i;
+            ImageView cupImg = loadCupImage(index, 84, 144);
+            StackPane cupPane = new StackPane(cupImg);
+            cupPane.setUserData(index);
+            cupPane.getStyleClass().add("card-container");
+            cupPane.setTranslateY(0);
+            cupPane.getStyleClass().add("card-style-default");
+
+            if (loser.isHuman()) {
+                cupPane.setOnMouseEntered(e -> {
+                    animateCardLift(cupPane, -14);
+                    cupPane.getStyleClass().removeAll("card-style-default");
+                    cupPane.getStyleClass().add("card-style-hover");
+                });
+                cupPane.setOnMouseExited(e -> {
+                    animateCardLift(cupPane, 0);
+                    cupPane.getStyleClass().removeAll("card-style-hover");
+                    cupPane.getStyleClass().add("card-style-default");
+                });
+                cupPane.setOnMouseClicked(e -> handleCupPickedSequence(index, cupPane, cupsRow));
+            }
+
+            cupsRow.getChildren().add(cupPane);
+        }
+
+        layoutContainer.getChildren().add(cupsRow);
         cupModal.setVisible(true);
+
+        if (!loser.isHuman()) {
+            handleBotPoisonPick(cupsRow);
+        }
     }
 
-    @FXML public void onSettingsClicked() {
+    private void handleCupPickedSequence(int chosenIndex, StackPane chosenPane, HBox cupsRow) {
+        cupsRow.setDisable(true);
+
+        chosenPane.getStyleClass().removeAll("card-style-default", "card-style-hover");
+        chosenPane.getStyleClass().add("card-style-selected");
+        chosenPane.setTranslateY(-20);
+
+        runDelayed(() -> {
+            cupModal.setVisible(false);
+            game.pickPoison(chosenIndex);
+            updateUI();
+        }, 900);
+    }
+
+    private void handleBotPoisonPick(HBox cupsRow) {
+        int botChoice = new Random().nextInt(3);
+        runDelayed(() -> {
+            if (botChoice < cupsRow.getChildren().size()) {
+                StackPane targetPane = (StackPane) cupsRow.getChildren().get(botChoice);
+                targetPane.getStyleClass().removeAll("card-style-default");
+                targetPane.getStyleClass().add("card-style-selected");
+                targetPane.setTranslateY(-20);
+            }
+            runDelayed(() -> {
+                cupModal.setVisible(false);
+                game.pickPoison(botChoice);
+                updateUI();
+            }, 1000);
+        }, 1200);
+    }
+
+    @FXML
+    public void onSettingsClicked() {
         System.out.println("SETTINGS");
     }
 
     // ── BOT MANAGEMENT ────────────────────────────────────────────────────────
     private void handleBotTurn() {
-        List<Player> ordered = humanFirst(game.getState().getActivePlayers());
         Player current = game.getState().getCurrentPlayer();
-        int seatIndex = 0;
-        for (int i = 0; i < ordered.size(); i++) {
-            if (ordered.get(i) == current) { seatIndex = i; break; }
-        }
-        final int finalSeatIndex = seatIndex;
+        final int finalSeatIndex = getPlayerSeatIndex(current);
+        final Player currentBot = current;
 
         runDelayed(() -> {
             List<Card> played = game.playBotTurn();
 
             if (!played.isEmpty()) {
+                if (currentBot != null) {
+                    String name = currentBot.getUsername().toUpperCase();
+                    String rank = game.getState().getDeclaredSymbol().toUpperCase();
+                    startActionMessageTimer(name + " PLAYS " + played.size() + " " + rank + "(s)");
+                }
                 List<double[]> positions = new ArrayList<>();
                 double[] base = getBotSeatScenePosition(finalSeatIndex);
                 for (int i = 0; i < played.size(); i++) {
@@ -547,35 +694,18 @@ public class GameController {
                             base[1]
                     });
                 }
-                animateGhostsToDeck(positions, () -> {
-                    if (game.getState().getPhase() == GamePhase.PICKING_POISON) {
-                        Player loser = game.getState().getLoser();
-                        if (loser != null && loser.isHuman()) showCupModal(loser);
-                        else handleBotPoisonPick();
-                    } else {
-                        updateUI();
-                    }
-                });
+                animateGhostsToDeck(positions, this::updateUI);
             } else {
-                if (game.getState().getPhase() == GamePhase.PICKING_POISON) {
-                    Player loser = game.getState().getLoser();
-                    if (loser != null && loser.isHuman()) showCupModal(loser);
-                    else handleBotPoisonPick();
-                } else {
-                    updateUI();
-                }
+                showBluffAlert(this::updateUI);
             }
         }, 2000);
     }
 
-    private void handleBotPoisonPick() {
-        runDelayed(() -> {
-            game.pickPoison(new Random().nextInt(3));
-            updateUI();
-        }, 1500);
+    // ── IMAGE RETRIEVAL ───────────────────────────────────────────────────────
+    private ImageView loadCupImage(int index, double w, double h) {
+        return loadImage("/com/leonidasAndrei/asserta/images/bottles/" + index + ".png", w, h);
     }
 
-    // ── IMAGE RETRIEVAL ───────────────────────────────────────────────────────
     private ImageView loadCardBack(double w, double h) {
         return loadImage("/com/leonidasAndrei/asserta/images/cards/back/0.png", w, h);
     }
@@ -593,17 +723,43 @@ public class GameController {
         ImageView iv = new ImageView();
         if (is == null) {
             System.out.println("❌ MISSING IMAGE PATH: " + path);
-            iv.setFitWidth(w); iv.setFitHeight(h);
+            iv.setFitWidth(w);
+            iv.setFitHeight(h);
             return iv;
         }
         iv.setImage(new Image(is, w, h, false, false));
-        iv.setFitWidth(w); iv.setFitHeight(h);
+        iv.setFitWidth(w);
+        iv.setFitHeight(h);
         iv.setPreserveRatio(false);
         iv.setSmooth(true);
         return iv;
     }
 
     // ── HELPERS ───────────────────────────────────────────────────────────────
+    private int getPlayerSeatIndex(Player p) {
+        for (int i = 0; i < seatsPane.getChildren().size(); i++) {
+            if (seatsPane.getChildren().get(i).getUserData() == p) {
+                return i;
+            }
+        }
+        return 0; // Safe baseline fallback to human seat slot
+    }
+
+    private void startActionMessageTimer(String msg) {
+        lastActionMessage = msg;
+        messageLabel.setText(lastActionMessage);
+
+        if (messageTimer != null) {
+            messageTimer.stop();
+        }
+
+        messageTimer = new Timeline(new KeyFrame(Duration.seconds(7), e -> {
+            lastActionMessage = "";
+            messageLabel.setText("");
+        }));
+        messageTimer.play();
+    }
+
     private Label makeNameLabel(String text, boolean isActive) {
         Label l = new Label(text.toUpperCase());
         l.setMinWidth(120);
@@ -627,7 +783,10 @@ public class GameController {
     private List<Player> humanFirst(List<Player> players) {
         int hi = 0;
         for (int i = 0; i < players.size(); i++) {
-            if (players.get(i).isHuman()) { hi = i; break; }
+            if (players.get(i).isHuman()) {
+                hi = i;
+                break;
+            }
         }
         List<Player> out = new ArrayList<>();
         for (int i = 0; i < players.size(); i++) {
@@ -644,8 +803,11 @@ public class GameController {
 
     private void runDelayed(Runnable action, long millis) {
         Thread t = new Thread(() -> {
-            try { Thread.sleep(millis); }
-            catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+            try {
+                Thread.sleep(millis);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
             Platform.runLater(action);
         });
         t.setDaemon(true);

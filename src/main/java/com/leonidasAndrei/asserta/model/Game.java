@@ -133,6 +133,7 @@ public class Game {
 
     public void pickPoison(int chosen) {
         Player loser = state.getLoser();
+        System.out.println("The cup " + chosen + " has been chosen!");
 
         try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
 

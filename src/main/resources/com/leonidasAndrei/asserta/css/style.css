@@ -125,6 +125,7 @@
     -fx-font-weight: bold;
     -fx-text-fill: #ffc4c4;
     -fx-effect: dropshadow(gaussian, #ff0000, 35, 0.75, 0, 0);
+    -fx-font-family: 'Arcade Interlaced';
 }
 
 #announcementLabel {
@@ -132,6 +133,13 @@
     -fx-font-weight: bold;
     -fx-text-fill: #e8d5b7;
     -fx-effect: dropshadow(gaussian, #c9a84c, 20, 0.6, 0, 0);
+    -fx-font-family: 'Arcade Interlaced';
+}
+
+#messageLabel {
+    -fx-font-size: 11px;
+    -fx-text-fill: #FFDE42;
+    -fx-font-family: 'Arcade Normal';
 }
 
 #callBluffButton {
@@ -223,4 +231,23 @@
     -fx-text-fill: #c9a84c;
     -fx-font-size: 28px;
     -fx-padding: 0;
+}
+
+#cupModalOverlay {
+    -fx-background-color: #101010;
+    -fx-border-color: #c9a84c;
+    -fx-border-width: 1.5;
+    -fx-padding: 44 52;
+    -fx-background-radius: 2;
+    -fx-border-radius: 2;
+    -fx-max-width: 860;
+    -fx-max-height: 460;
+}
+
+#cupModalTitle {
+    -fx-font-size: 16px;
+    -fx-text-fill: #d0c0a0;
+    -fx-font-weight: bold;
+    -fx-font-family: "Arcade Normal";
+    -fx-text-alignment: center;
 }

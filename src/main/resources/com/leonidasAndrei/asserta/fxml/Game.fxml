@@ -38,14 +38,14 @@
           visible="false">
 
         <Button fx:id="callBluffButton"
-                text="⚠  CALL BLUFF"
+                text="CALL BLUFF"
                 onAction="#onCallBluffClicked"
-                style="-fx-background-color: #261212; -fx-text-fill: #ff5555; -fx-border-color: #cc3333; -fx-border-width: 1.5; -fx-font-weight: bold; -fx-padding: 10 20; -fx-cursor: hand;"/>
+                />
 
         <HBox fx:id="handBox" alignment="CENTER" spacing="8"/>
 
         <Button fx:id="playButton"
-                text="▶  PLAY CARDS"
+                text="PLAY CARDS"
                 onAction="#onPlayClicked"
                 visible="false"
                 disable="true"/>
@@ -55,12 +55,11 @@
            layoutX="390" layoutY="742"
            prefWidth="500"
            alignment="CENTER"
-           style="-fx-font-size:11px;-fx-text-fill:#ff5555;-fx-font-family:'Arcade Normal';"
            wrapText="true"
     />
 
     <StackPane fx:id="bluffOverlay" prefWidth="1280" prefHeight="960" visible="false" mouseTransparent="true" style="-fx-background-color: rgba(0,0,0,0.85);">
-        <Label fx:id="bluffLabel" text="⚠  BLUFF CALLED!"/>
+        <Label fx:id="bluffLabel" text="BLUFF CALLED!"/>
     </StackPane>
 
     <StackPane fx:id="announcementOverlay" prefWidth="1280" prefHeight="960" visible="false" style="-fx-background-color: rgba(0,0,0,0.85);">
@@ -68,12 +67,8 @@
     </StackPane>
 
     <StackPane fx:id="cupModal" prefWidth="1280" prefHeight="960" visible="false" style="-fx-background-color: rgba(0,0,0,0.78);">
-        <VBox alignment="CENTER" spacing="24" style="-fx-background-color: #101010; -fx-border-color: #c9a84c; -fx-border-width: 1.5; -fx-padding: 44 52; -fx-background-radius: 2; -fx-border-radius: 2; -fx-max-width: 460; -fx-max-height: 260;">
-            <Label fx:id="cupModalTitle" wrapText="true" alignment="CENTER" style="-fx-font-size: 16px; -fx-text-fill: #d0c0a0; -fx-font-weight: bold;"/>
-            <HBox spacing="24" alignment="CENTER">
-                <Button text="✗  WRONG" onAction="#onWrongClicked" style="-fx-background-color:#180808;-fx-text-fill:#ff5555; -fx-border-color:#cc3333;-fx-border-width:1.5;-fx-border-radius:0;-fx-background-radius:0;-fx-font-size:14px;-fx-font-weight:bold;-fx-padding:11 32;-fx-cursor:hand;"/>
-                <Button text="✓  RIGHT" onAction="#onRightClicked" style="-fx-background-color:#081408;-fx-text-fill:#55cc77; -fx-border-color:#338844;-fx-border-width:1.5;-fx-border-radius:0;-fx-background-radius:0;-fx-font-size:14px;-fx-font-weight:bold;-fx-padding:11 32;-fx-cursor:hand;"/>
-            </HBox>
+        <VBox fx:id="cupModalOverlay" alignment="CENTER" spacing="24">
+            <Label fx:id="cupModalTitle" wrapText="true" alignment="CENTER"/>
         </VBox>
     </StackPane>
 
