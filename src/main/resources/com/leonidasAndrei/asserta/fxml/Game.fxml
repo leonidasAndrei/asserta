@@ -67,9 +67,34 @@
     </StackPane>
 
     <StackPane fx:id="cupModal" prefWidth="1280" prefHeight="960" visible="false" style="-fx-background-color: rgba(0,0,0,0.78);">
-        <VBox fx:id="cupModalOverlay" alignment="CENTER" spacing="24">
+        <VBox fx:id="cupModalOverlay" alignment="CENTER" spacing="24" visible="false" managed="false">
             <Label fx:id="cupModalTitle" wrapText="true" alignment="CENTER"/>
         </VBox>
+
+        <VBox fx:id="eliminationBox" alignment="CENTER" spacing="28" visible="false" managed="false">
+            <Label fx:id="eliminatedLabel" text="ELIMINATED"
+                   alignment="CENTER" />
+            <HBox alignment="CENTER" spacing="24">
+                <Button fx:id="spectateButton" text="SPECTATE MATCH"
+                        onAction="#onSpectateClicked"
+                        />
+                <Button text="MAIN MENU"
+                        onAction="#onMainMenuClicked"
+                        styleClass="mainmenuButton"
+                        />
+            </HBox>
+        </VBox>
+
+        <VBox fx:id="victoryBox" alignment="CENTER" spacing="28" visible="false" managed="false">
+            <Label fx:id="victoryLabel"
+                   style=""
+                   alignment="CENTER" />
+            <Button text="MAIN MENU"
+                    onAction="#onMainMenuClicked"
+                    styleClass="mainmenuButton"
+                    />
+        </VBox>
+
     </StackPane>
 
 </Pane>

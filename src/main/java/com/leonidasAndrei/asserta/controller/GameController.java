@@ -44,11 +44,16 @@ public class GameController {
     @FXML private Button    callBluffButton;
     @FXML private Button    playButton;
     @FXML private HBox      actionBar;
+    @FXML private VBox      cupModalOverlay;
+    @FXML private VBox      eliminationBox;
+    @FXML private VBox      victoryBox;
+    @FXML private Label     victoryLabel;
 
     private Game game;
     private final List<Card> selectedCards = new ArrayList<>();
     private boolean isDealingAnimationRunning = false;
     private boolean isInitialStartDone = false;
+    private boolean isSpectatingMode = false;
     private String lastActionMessage = "";
     private Timeline messageTimer;
 
@@ -61,6 +66,7 @@ public class GameController {
         this.selectedCards.clear();
         this.isDealingAnimationRunning = false;
         this.isInitialStartDone = false;
+        this.isSpectatingMode = false;
         this.lastActionMessage = "";
         if (messageTimer != null) {
             messageTimer.stop();
@@ -74,6 +80,14 @@ public class GameController {
     // ── UPDATE ────────────────────────────────────────────────────────────────
     public void updateUI() {
         if (game == null) return;
+
+        List<Player> humans = game.getState().getActivePlayers().stream().filter(Player::isHuman).toList();
+        long aliveHumans = humans.stream().filter(p -> !p.isEliminated()).count();
+
+        if (aliveHumans == 0 && !isSpectatingMode) {
+            showEliminationOrGameOverOverlay(humans.size() > 1);
+            return;
+        }
 
         if (game.getState().getRound() == 0 && !isInitialStartDone) {
             isInitialStartDone = true;
@@ -93,10 +107,10 @@ public class GameController {
         renderSeatsExcludingCards(isDealingAnimationRunning);
         renderHumanHand();
 
-        boolean isHumanTurn = current != null && current.isHuman();
+        boolean isHumanTurn = current != null && current.isHuman() && !current.isEliminated() && !isSpectatingMode;
         boolean canBluff = phase == GamePhase.WAITING && game.getState().getNumberOfTurns() > 0;
 
-        actionBar.setVisible(!isDealingAnimationRunning);
+        actionBar.setVisible(!isDealingAnimationRunning && !isSpectatingMode);
         callBluffButton.setVisible(!isDealingAnimationRunning && isHumanTurn && canBluff);
         playButton.setVisible(!isDealingAnimationRunning && isHumanTurn);
         playButton.setDisable(selectedCards.isEmpty());
@@ -115,17 +129,12 @@ public class GameController {
                 }
             }
             case GAME_OVER -> {
-                System.out.println("GAME OVER!!!!");
                 cupModal.setVisible(false);
-                try {
-                    App.switchScene("GameOver", game);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                showFinalWinnerOverlay();
             }
             default -> {
                 cupModal.setVisible(false);
-                if (current != null && !current.isHuman() && !isDealingAnimationRunning) {
+                if (current != null && (!current.isHuman() || current.isEliminated() || isSpectatingMode) && !isDealingAnimationRunning) {
                     handleBotTurn();
                 }
             }
@@ -209,20 +218,20 @@ public class GameController {
                 seat.setMinHeight(boxHeight);
                 seat.setPrefHeight(boxHeight);
                 seat.setMaxHeight(boxHeight);
-                seat.setUserData(p); // Anchor player identification directly inside node metadata memory
+                seat.setUserData(p);
 
-                if (i == 1) { // Left
+                if (i == 1) {
                     seat.setRotate(90);
                     seat.setLayoutX(130 - (boxWidth / 2));
                     seat.setLayoutY(480 - (boxHeight / 2));
-                } else if (i == 3) { // Right
+                } else if (i == 3) {
                     seat.setRotate(-90);
                     seat.setLayoutX(1150 - (boxWidth / 2));
                     seat.setLayoutY(480 - (boxHeight / 2));
-                } else if (i == 2) { // Top
+                } else if (i == 2) {
                     seat.setLayoutX(640 - (boxWidth / 2));
                     seat.setLayoutY(85 - (boxHeight / 2));
-                } else { // Bottom (Human)
+                } else {
                     seat.setLayoutX(640 - (boxWidth / 2));
                     seat.setLayoutY(932 - (boxHeight / 2));
                 }
@@ -240,7 +249,6 @@ public class GameController {
                 int index = seatsPane.getChildren().indexOf(seat);
                 boolean isTop = (index == 2);
 
-                // Clear layout contents cleanly before refreshing states
                 seat.getChildren().clear();
                 seat.getStyleClass().remove("seat-box-active");
 
@@ -265,7 +273,6 @@ public class GameController {
                     seat.getChildren().addAll(cards, name);
                 }
 
-                // If active, pulse. Otherwise, ensure it stops completely.
                 if (isActive && !hideAllCards) {
                     seat.getStyleClass().add("seat-box-active");
                     pulseNode(seat);
@@ -279,10 +286,10 @@ public class GameController {
     // ── HUMAN HAND ────────────────────────────────────────────────────────────
     private void renderHumanHand() {
         handBox.getChildren().clear();
-        if (isDealingAnimationRunning) return;
+        if (isDealingAnimationRunning || isSpectatingMode) return;
 
         Player human = humanPlayer();
-        if (human == null) return;
+        if (human == null || human.isEliminated()) return;
 
         for (Card card : human.getHand()) {
             boolean sel = isSelectedByIdentity(card);
@@ -411,21 +418,27 @@ public class GameController {
 
     private void showRoundAnnouncement(Runnable after) {
         String rank = game.getState().getDeclaredSymbol();
-        announcementLabel.setText(rank.toUpperCase() + "'S TABLE");
+        showAnnouncement(rank.toUpperCase() + "'S TABLE", after);
+    }
+
+    private void showAnnouncement( String text, Runnable after) {
+        announcementLabel.setText(text);
         announcementOverlay.setOpacity(0);
         announcementOverlay.setVisible(true);
 
-        FadeTransition fadeIn = new FadeTransition(Duration.millis(400), announcementOverlay);
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(450), announcementOverlay);
         fadeIn.setToValue(1.0);
+
         fadeIn.setOnFinished(e -> runDelayed(() -> {
-            FadeTransition fadeOut = new FadeTransition(Duration.millis(500), announcementOverlay);
-            fadeOut.setToValue(0);
-            fadeOut.setOnFinished(ev -> {
-                announcementOverlay.setVisible(false);
-                if (after != null) after.run();
-            });
-            fadeOut.play();
-        }, 1800));
+                    FadeTransition fadeOut = new FadeTransition(Duration.millis(450), announcementOverlay);
+                    fadeOut.setToValue(0);
+                    fadeOut.setOnFinished(ev -> {
+                        announcementOverlay.setVisible(false);
+                        if (after != null) {after.run();}
+                    });
+                    fadeOut.play();
+                }, 1500)
+        );
         fadeIn.play();
     }
 
@@ -455,7 +468,6 @@ public class GameController {
     }
 
     private void pulseNode(VBox node) {
-        // Prevent stacking duplicate animations on the same node
         ScaleTransition existing = (ScaleTransition) node.getProperties().get("active-pulse");
         if (existing != null) {
             return;
@@ -479,7 +491,6 @@ public class GameController {
             existing.stop();
             node.getProperties().remove("active-pulse");
         }
-        // Force the scale cleanly back to normal size
         node.setScaleX(1.0);
         node.setScaleY(1.0);
     }
@@ -576,66 +587,92 @@ public class GameController {
         });
     }
 
-    // ── DYNAMIC CUP MODAL LOGIC ───────────────────────────────────────────────
-    private void showCupModal(Player loser) {
-        cupModalTitle.setText("\"" + loser.getUsername().toUpperCase() + "\" WAS WRONG!\n" + "SELECT A CUP TO DRINK CONSEQUENCES:");
+     // Helper method to toggle between the modal sub-views seamlessly
+        private void showModalSubView(VBox activeSubView) {
+            cupModal.setVisible(true);
 
-        VBox layoutContainer = null;
-        for (Node node : cupModal.getChildren()) {
-            if (node instanceof VBox) {
-                layoutContainer = (VBox) node;
-                break;
+            // Loop through and toggle visibility/management states
+            List.of(cupModalOverlay, eliminationBox, victoryBox).forEach(view -> {
+                boolean isTarget = view.equals(activeSubView);
+                view.setVisible(isTarget);
+                view.setManaged(isTarget);
+            });
+        }
+
+        // ── DYNAMIC CUP MODAL LOGIC ───────────────────────────────────────────────
+        private void showCupModal(Player loser) {
+            cupModalTitle.setText("\"" + loser.getUsername().toUpperCase() + "\" WAS WRONG!\n" + "SELECT A CUP TO DRINK CONSEQUENCES:");
+
+            // Clear dynamic elements safely without wiping structure
+            cupModalOverlay.getChildren().removeIf(node -> node instanceof HBox);
+
+            HBox cupsRow = new HBox(50);
+            cupsRow.setAlignment(Pos.CENTER);
+            cupsRow.setPadding(new Insets(20, 40, 20, 40));
+            System.out.println(game.getState().getPoisonedCup());
+
+            for (int i = 1; i < 4; i++) {
+                final int index = i;
+                ImageView cupImg = loadCupImage(index, 84, 144);
+                StackPane cupPane = new StackPane(cupImg);
+                cupPane.setUserData(index);
+                cupPane.getStyleClass().addAll("card-container", "card-style-default");
+
+                if (loser.isHuman()) {
+                    cupPane.setOnMouseEntered(e -> {
+                        animateCardLift(cupPane, -14);
+                        cupPane.getStyleClass().removeAll("card-style-default");
+                        cupPane.getStyleClass().add("card-style-hover");
+                    });
+                    cupPane.setOnMouseExited(e -> {
+                        animateCardLift(cupPane, 0);
+                        cupPane.getStyleClass().removeAll("card-style-hover");
+                        cupPane.getStyleClass().add("card-style-default");
+                    });
+                    cupPane.setOnMouseClicked(e -> handleCupPickedSequence(index, cupPane, cupsRow, loser));
+                }
+                cupsRow.getChildren().add(cupPane);
+            }
+
+            cupModalOverlay.getChildren().add(cupsRow);
+            showModalSubView(cupModalOverlay);
+
+            if (!loser.isHuman()) {
+                handleBotPoisonPick(cupsRow, loser);
             }
         }
-        if (layoutContainer == null) {
-            layoutContainer = new VBox(24);
-            layoutContainer.setAlignment(Pos.CENTER);
-            cupModal.getChildren().add(layoutContainer);
+
+        // ── GAME TERMINATION AND ELIMINATION MODAL LAYOUTS ────────────────────────
+        private void showEliminationOrGameOverOverlay(boolean wasMultiplayerHumanGame) {
+            showModalSubView(eliminationBox);
         }
 
-        layoutContainer.getChildren().clear();
-        layoutContainer.getChildren().add(cupModalTitle);
+        private void showFinalWinnerOverlay() {
+            List<Player> remaining = game.getState().getActivePlayers().stream().filter(p -> !p.isEliminated()).toList();
+            String winnerName = remaining.isEmpty() ? "PLAYER" : remaining.get(0).getUsername().toUpperCase();
 
-        // Evenly spaced out layout row with custom padding around the bottles
-        HBox cupsRow = new HBox(50);
-        cupsRow.setAlignment(Pos.CENTER);
-        cupsRow.setPadding(new Insets(20, 40, 20, 40));
+            victoryLabel.setText("🏆  VICTORY  🏆\n\n" + winnerName + " IS THE WINNER!");
+            showModalSubView(victoryBox);
+        }
 
-        for (int i = 1; i < 4; i++) {
-            final int index = i;
-            ImageView cupImg = loadCupImage(index, 84, 144);
-            StackPane cupPane = new StackPane(cupImg);
-            cupPane.setUserData(index);
-            cupPane.getStyleClass().add("card-container");
-            cupPane.setTranslateY(0);
-            cupPane.getStyleClass().add("card-style-default");
+        // ── NEW FXML INTERACTIVE BUTTON HANDLERS ──────────────────────────────────
+        @FXML
+        public void onSpectateClicked() {
+            isSpectatingMode = true;
+            cupModal.setVisible(false);
+            updateUI();
+        }
 
-            if (loser.isHuman()) {
-                cupPane.setOnMouseEntered(e -> {
-                    animateCardLift(cupPane, -14);
-                    cupPane.getStyleClass().removeAll("card-style-default");
-                    cupPane.getStyleClass().add("card-style-hover");
-                });
-                cupPane.setOnMouseExited(e -> {
-                    animateCardLift(cupPane, 0);
-                    cupPane.getStyleClass().removeAll("card-style-hover");
-                    cupPane.getStyleClass().add("card-style-default");
-                });
-                cupPane.setOnMouseClicked(e -> handleCupPickedSequence(index, cupPane, cupsRow));
+        @FXML
+        public void onMainMenuClicked() {
+            try {
+                App.switchScene("Setup", game);
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
-
-            cupsRow.getChildren().add(cupPane);
         }
 
-        layoutContainer.getChildren().add(cupsRow);
-        cupModal.setVisible(true);
-
-        if (!loser.isHuman()) {
-            handleBotPoisonPick(cupsRow);
-        }
-    }
-
-    private void handleCupPickedSequence(int chosenIndex, StackPane chosenPane, HBox cupsRow) {
+    private void handleCupPickedSequence(int chosenIndex, StackPane chosenPane, HBox cupsRow, Player loser) {
         cupsRow.setDisable(true);
 
         chosenPane.getStyleClass().removeAll("card-style-default", "card-style-hover");
@@ -644,12 +681,20 @@ public class GameController {
 
         runDelayed(() -> {
             cupModal.setVisible(false);
+
+            int livesBefore = loser.getLives();
             game.pickPoison(chosenIndex);
-            updateUI();
+
+            if (loser.getLives() < livesBefore) {
+                showAnnouncement("💔 " + loser.getUsername().toUpperCase() + " LOST A LIFE! 💔", this::updateUI);
+
+            } else {
+                showAnnouncement("✨ " + loser.getUsername().toUpperCase() + " SURVIVED! ✨", this::updateUI);
+            }
         }, 900);
     }
 
-    private void handleBotPoisonPick(HBox cupsRow) {
+    private void handleBotPoisonPick(HBox cupsRow, Player loser) {
         int botChoice = new Random().nextInt(3);
         runDelayed(() -> {
             if (botChoice < cupsRow.getChildren().size()) {
@@ -660,9 +705,17 @@ public class GameController {
             }
             runDelayed(() -> {
                 cupModal.setVisible(false);
+
+                int livesBefore = loser.getLives();
                 game.pickPoison(botChoice);
-                updateUI();
+
+                if (loser.getLives() < livesBefore) {
+                    showAnnouncement("💔 " + loser.getUsername().toUpperCase() + " LOST A LIFE! 💔", this::updateUI);
+                } else {
+                    showAnnouncement("✨ " + loser.getUsername().toUpperCase() + " SURVIVED! ✨", this::updateUI);
+                }
             }, 1000);
+
         }, 1200);
     }
 
@@ -742,7 +795,7 @@ public class GameController {
                 return i;
             }
         }
-        return 0; // Safe baseline fallback to human seat slot
+        return 0;
     }
 
     private void startActionMessageTimer(String msg) {

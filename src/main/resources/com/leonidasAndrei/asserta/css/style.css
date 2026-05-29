@@ -233,13 +233,13 @@
     -fx-padding: 0;
 }
 
-#cupModalOverlay {
+#cupModalOverlay, #eliminationBox, #victoryBox {
     -fx-background-color: #101010;
     -fx-border-color: #c9a84c;
     -fx-border-width: 1.5;
     -fx-padding: 44 52;
-    -fx-background-radius: 2;
-    -fx-border-radius: 2;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
     -fx-max-width: 860;
     -fx-max-height: 460;
 }
@@ -250,4 +250,43 @@
     -fx-font-weight: bold;
     -fx-font-family: "Arcade Normal";
     -fx-text-alignment: center;
+}
+
+#eliminatedLabel {
+    -fx-text-fill: red;
+    -fx-font-size: 46px;
+    -fx-font-weight: bold;
+    -fx-text-alignment: center;
+    -fx-font-family: "Arcade Interlaced";
+}
+
+#spectateButton {
+    -fx-background-color: #2b2b2b;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 12 24;
+    -fx-cursor: hand;
+    -fx-border-color: #555555;
+    -fx-border-width: 2;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.mainmenuButton, .mainmenuButton:hover {
+    -fx-background-color: #1a5230;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 12 32;
+    -fx-cursor: hand;
+    -fx-background-radius: 6;
+}
+
+#victoryLabel {
+    -fx-text-fill: #FFD700;
+    -fx-font-size: 46px;
+    -fx-font-weight: bold;
+    -fx-text-alignment: center;
+    -fx-font-family: "Arcade Interlaced";
 }
