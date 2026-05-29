@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import com.leonidasAndrei.asserta.model.GameState.*;
-
 public class Game {
 
     //ATTRIBUTES
@@ -25,7 +23,6 @@ public class Game {
     }
 
     public void startGame() {
-
         state.setActivePlayers(players);
         state.setPhase(GamePhase.NEW_ROUND);
 
@@ -65,6 +62,7 @@ public class Game {
         }
 
         state.getTableCards().addAll(cardsPlayed);
+        state.setLastCardsPlayedCount(cardsPlayed.size());
         state.setLastClaimer(currentPlayer);
         state.addNumberOfTurns();
 
@@ -78,11 +76,9 @@ public class Game {
     }
 
     public void nextTurn() {
-
         int next = (state.getCurrentPlayerIndex() + 1) % state.getActivePlayers().size();
         state.setCurrentPlayerIndex(next);
         state.setCurrentPlayer(state.getActivePlayers().get(next));
-
     }
 
     public void callBluff() {
@@ -104,8 +100,15 @@ public class Game {
 
     private boolean checkBluff() {
         List<Card> table = state.getTableCards();
+        int count = state.getLastCardsPlayedCount();
+        int size = table.size();
 
-        for (Card c : table) {
+        if (count <= 0) count = size;
+
+        for (int i = size - count; i < size; i++) { //start from lastCardsPlayed
+            if (i < 0) continue;
+            Card c = table.get(i);
+
             // Jokers are wild
             if (c.getRank() == 0) continue;
 
@@ -117,33 +120,33 @@ public class Game {
     }
 
     private void handleAfterBluff() {
-
-        state.getActivePlayers().removeIf(Player::isEliminated); //remove all eliminated players from activePlayers
+        state.getActivePlayers().removeIf(Player::isEliminated); //remove all eliminated players
 
         if (checkWinner()) return;
         startNewRound();
     }
 
     private void handlePunishment(Player loser) {
-        // set phase and randomize poisoned cup into state
         state.setLoser(loser);
-        state.setPoisonedCup(new Random().nextInt(3) + 1);
         state.setPhase(GamePhase.PICKING_POISON);
     }
 
-    public void pickPoison(int chosen) {
+    // FIX: Removed Thread.sleep completely. Delays are now controlled cleanly inside the GameController layer.
+    public void pickPoison(int chosenIndex) {
         Player loser = state.getLoser();
-        System.out.println("The cup " + chosen + " has been chosen!");
+        System.out.println("The cup " + (chosenIndex + 1) + " has been chosen!");
 
-        try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
-
-        if (chosen == state.getPoisonedCup() - 1) {
+        if (chosenIndex == state.getPoisonedCupIndex()) {
             System.out.println("Poisoned! " + loser.getUsername() + " loses a life!");
             loser.loseLife();
-        }
-        else {
+
+            // Memory resets, new poison index rolled for the next incident
+            state.resetPoisonMemory();
+        } else {
             System.out.println("Safe! " + loser.getUsername() + " survives!");
-            System.out.println("(The poisoned cup was cup " + (state.getPoisonedCup() - 1) + ")");
+
+            // Survived -> Remember this selection as empty/unavailable for subsequent penalties
+            state.setCupChosen(chosenIndex);
         }
         handleAfterBluff();
     }
@@ -157,6 +160,7 @@ public class Game {
         state.setDeclaredSymbol("");
         state.setLastClaimer(null);
         state.setNumberOfTurns(0);
+        state.setLastCardsPlayedCount(0);
         state.addRound();
     }
 
@@ -170,9 +174,6 @@ public class Game {
     }
 
     public List<Card> playBotTurn() {
-
-        botThink(3);
-
         Player bot = state.getCurrentPlayer();
         Random random = new Random();
         double smartRoll = Math.random();
@@ -187,9 +188,8 @@ public class Game {
 
                 if (verySuspicious || slightlySuspicious) {
                     System.out.println(bot.getUsername() + " calls bluff!");
-                    botThink(1);
                     callBluff();
-                    return new ArrayList<>(); // no cards played, bluff called
+                    return new ArrayList<>();
                 }
             }
 
@@ -215,7 +215,6 @@ public class Game {
         } else {
             if (!state.getTableCards().isEmpty() && Math.random() < 0.25) {
                 System.out.println(bot.getUsername() + " calls bluff!");
-                botThink(1);
                 callBluff();
                 return new ArrayList<>();
             }
@@ -231,31 +230,11 @@ public class Game {
 
         System.out.println(bot.getUsername() + " plays " + toPlay.size()
                 + " " + state.getDeclaredSymbol() + "(s).");
-        botThink(1);
         playTurn(toPlay);
         return toPlay;
     }
 
-    private void botThink(int seconds) {
-        for (int i = 0; i < seconds; i++) {
-            System.out.println("...");
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-    }
-
-    public GameState getState() {
-        return state;
-    }
-
-    public Deck getDeck() {
-        return deck;
-    }
-
-    public List<Player> getPlayers() {
-        return players;
-    }
+    public GameState getState() { return state; }
+    public Deck getDeck() { return deck; }
+    public List<Player> getPlayers() { return players; }
 }

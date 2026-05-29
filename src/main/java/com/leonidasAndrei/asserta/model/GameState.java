@@ -2,11 +2,11 @@ package com.leonidasAndrei.asserta.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class GameState {
 
-    //ATTRIBUTES
-
+    // ATTRIBUTES
     private List<Player> activePlayers;
     private Player currentPlayer;
     private Player lastClaimer;
@@ -16,55 +16,51 @@ public class GameState {
     private String declaredSymbol;
     private List<Card> tableCards;
     private int numberOfTurns;
-    private int poisonedCup;
     private GamePhase phase;
     private int round;
 
-    //CONSTRUCTORS
+    // FIXES & IMPROVEMENTS ATTRIBUTES
+    private int lastCardsPlayedCount;            // Tracks card count of the most recent turn
+    private boolean[] cupsAvailable;             // Persistent track of unchosen cups (true = full, false = empty)
+    private int poisonedCupIndex;                // Hidden index of the poison (0 to 3)
+
+    // CONSTRUCTORS
     public GameState(List<Player> players) {
-        activePlayers = new ArrayList<>(players);
-        tableCards = new ArrayList<>();
-        currentPlayer = null;
-        lastClaimer = null;
-        loser = null;
-        declaredRank = 127;
-        declaredSymbol = "";
-        currentPlayerIndex = 0;
-        numberOfTurns = 0;
-        poisonedCup = 127;
-        phase = GamePhase.WAITING;
-        round = 0;
+        this.activePlayers = new ArrayList<>(players);
+        this.tableCards = new ArrayList<>();
+        this.numberOfTurns = 0;
+        this.round = 0;
+        this.phase = GamePhase.NEW_ROUND;
+
+        // Initialize persistent 4 poison cups tracking
+        this.cupsAvailable = new boolean[]{true, true, true, true};
+        scramblePoisonCupIndex();
     }
 
-    public GameState(
-            List<Player> players,
-            Player currentPlayer,
-            Player lastClaimer,
-            Player loser,
-            int declaredRank,
-            String declaredSymbol,
-            List<Card> tableCards,
-            int currentPlayerIndex,
-            int numberOfTurns,
-            int poisonedCup,
-            GamePhase phase,
-            int round
-    ) {
-        this.activePlayers = players;
-        this.currentPlayer = currentPlayer;
-        this.lastClaimer = lastClaimer;
-        this.loser = loser;
-        this.declaredRank = declaredRank;
-        this.declaredSymbol = declaredSymbol;
-        this.tableCards = tableCards;
-        this.currentPlayerIndex = currentPlayerIndex;
-        this.numberOfTurns = numberOfTurns;
-        this.poisonedCup = poisonedCup;
-        this.phase = phase;
-        this.round = round;
+    // POISON MEMORY HELPERS
+    public void resetPoisonMemory() {
+        for (int i = 0; i < 4; i++) {
+            cupsAvailable[i] = true;
+        }
+        scramblePoisonCupIndex();
     }
 
-    //METHODS
+    public void scramblePoisonCupIndex() {
+        this.poisonedCupIndex = new Random().nextInt(4); // 0, 1, 2, or 3
+    }
+
+    public boolean isCupAvailable(int index) {
+        if (index < 0 || index >= 4) return false;
+        return cupsAvailable[index];
+    }
+
+    public void setCupChosen(int index) {
+        if (index >= 0 && index < 4) {
+            this.cupsAvailable[index] = false;
+        }
+    }
+
+    // GETTERS AND SETTERS
     public List<Player> getActivePlayers() {
         return activePlayers;
     }
@@ -89,9 +85,13 @@ public class GameState {
         this.lastClaimer = lastClaimer;
     }
 
-    public Player getLoser() { return loser; }
+    public Player getLoser() {
+        return loser;
+    }
 
-    public void setLoser(Player loser) { this.loser = loser; }
+    public void setLoser(Player loser) {
+        this.loser = loser;
+    }
 
     public int getCurrentPlayerIndex() {
         return currentPlayerIndex;
@@ -134,14 +134,7 @@ public class GameState {
     }
 
     public void addNumberOfTurns() {
-        numberOfTurns++;
-    }
-
-    public int getPoisonedCup() { return poisonedCup; }
-
-    public void setPoisonedCup(int poisonedCup) {
-        if (poisonedCup < 1 || poisonedCup > 3) throw new IllegalArgumentException("Cup must be 1, 2 or 3");
-        this.poisonedCup = poisonedCup;
+        this.numberOfTurns++;
     }
 
     public GamePhase getPhase() {
@@ -156,7 +149,27 @@ public class GameState {
         return round;
     }
 
+    public void setRound(int round) {
+        this.round = round;
+    }
+
     public void addRound() {
-        round++;
+        this.round++;
+    }
+
+    public int getLastCardsPlayedCount() {
+        return lastCardsPlayedCount;
+    }
+
+    public void setLastCardsPlayedCount(int lastCardsPlayedCount) {
+        this.lastCardsPlayedCount = lastCardsPlayedCount;
+    }
+
+    public int getPoisonedCupIndex() {
+        return poisonedCupIndex;
+    }
+
+    public boolean[] getCupsAvailable() {
+        return cupsAvailable;
     }
 }

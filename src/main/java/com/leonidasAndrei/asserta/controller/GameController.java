@@ -599,24 +599,33 @@ public class GameController {
             });
         }
 
-        // ── DYNAMIC CUP MODAL LOGIC ───────────────────────────────────────────────
-        private void showCupModal(Player loser) {
-            cupModalTitle.setText("\"" + loser.getUsername().toUpperCase() + "\" WAS WRONG!\n" + "SELECT A CUP TO DRINK CONSEQUENCES:");
+    // ── DYNAMIC CUP MODAL LOGIC ───────────────────────────────────────────────
+    private void showCupModal(Player loser) {
+        cupModalTitle.setText("\"" + loser.getUsername().toUpperCase() + "\" WAS WRONG!\n" + "SELECT A CUP TO DRINK CONSEQUENCES:");
 
-            // Clear dynamic elements safely without wiping structure
-            cupModalOverlay.getChildren().removeIf(node -> node instanceof HBox);
+        cupModalOverlay.getChildren().removeIf(node -> node instanceof HBox);
 
-            HBox cupsRow = new HBox(50);
-            cupsRow.setAlignment(Pos.CENTER);
-            cupsRow.setPadding(new Insets(20, 40, 20, 40));
-            System.out.println(game.getState().getPoisonedCup());
+        HBox cupsRow = new HBox(50);
+        cupsRow.setAlignment(Pos.CENTER);
+        cupsRow.setPadding(new Insets(20, 40, 20, 40));
 
-            for (int i = 1; i < 4; i++) {
-                final int index = i;
-                ImageView cupImg = loadCupImage(index, 84, 144);
-                StackPane cupPane = new StackPane(cupImg);
-                cupPane.setUserData(index);
-                cupPane.getStyleClass().addAll("card-container", "card-style-default");
+        boolean[] available = game.getState().getCupsAvailable(); // 4 cups, 0-indexed
+
+        for (int i = 0; i < 4; i++) {
+            final int index = i;
+            boolean isTaken = !available[i];
+
+            ImageView cupImg = loadCupImage(i + 1, 84, 144);
+            StackPane cupPane = new StackPane(cupImg);
+            cupPane.setUserData(index);
+            cupPane.getStyleClass().addAll("card-container");
+
+            if (isTaken) {
+                cupImg.setImage(loadCupImage(0,84,144).getImage());
+                cupPane.setDisable(true);
+                cupPane.getStyleClass().add("card-style-default");
+            } else {
+                cupPane.getStyleClass().add("card-style-default");
 
                 if (loser.isHuman()) {
                     cupPane.setOnMouseEntered(e -> {
@@ -629,18 +638,22 @@ public class GameController {
                         cupPane.getStyleClass().removeAll("card-style-hover");
                         cupPane.getStyleClass().add("card-style-default");
                     });
-                    cupPane.setOnMouseClicked(e -> handleCupPickedSequence(index, cupPane, cupsRow, loser));
+                    cupPane.setOnMouseClicked(e ->
+                            handleCupPickedSequence(index, cupPane, cupsRow, loser)
+                    );
                 }
-                cupsRow.getChildren().add(cupPane);
             }
 
-            cupModalOverlay.getChildren().add(cupsRow);
-            showModalSubView(cupModalOverlay);
-
-            if (!loser.isHuman()) {
-                handleBotPoisonPick(cupsRow, loser);
-            }
+            cupsRow.getChildren().add(cupPane);
         }
+
+        cupModalOverlay.getChildren().add(cupsRow);
+        showModalSubView(cupModalOverlay);
+
+        if (!loser.isHuman()) {
+            handleBotPoisonPick(cupsRow, loser);
+        }
+    }
 
         // ── GAME TERMINATION AND ELIMINATION MODAL LAYOUTS ────────────────────────
         private void showEliminationOrGameOverOverlay(boolean wasMultiplayerHumanGame) {
@@ -651,7 +664,7 @@ public class GameController {
             List<Player> remaining = game.getState().getActivePlayers().stream().filter(p -> !p.isEliminated()).toList();
             String winnerName = remaining.isEmpty() ? "PLAYER" : remaining.get(0).getUsername().toUpperCase();
 
-            victoryLabel.setText("🏆  VICTORY  🏆\n\n" + winnerName + " IS THE WINNER!");
+            victoryLabel.setText("🏆 " + winnerName + " WON 🏆!");
             showModalSubView(victoryBox);
         }
 
@@ -680,42 +693,65 @@ public class GameController {
         chosenPane.setTranslateY(-20);
 
         runDelayed(() -> {
-            cupModal.setVisible(false);
-
             int livesBefore = loser.getLives();
             game.pickPoison(chosenIndex);
+            cupModal.setVisible(false);
 
             if (loser.getLives() < livesBefore) {
                 showAnnouncement("💔 " + loser.getUsername().toUpperCase() + " LOST A LIFE! 💔", this::updateUI);
-
             } else {
-                showAnnouncement("✨ " + loser.getUsername().toUpperCase() + " SURVIVED! ✨", this::updateUI);
+                showAnnouncement("✨ " + loser.getUsername().toUpperCase() + " SURVIVED! ✨", () -> {
+                    Player stillLoser = game.getState().getLoser();
+                    if (stillLoser != null && game.getState().getPhase() == GamePhase.PICKING_POISON) {
+                        showCupModal(stillLoser);
+                    } else {
+                        updateUI();
+                    }
+                });
             }
         }, 900);
     }
 
     private void handleBotPoisonPick(HBox cupsRow, Player loser) {
-        int botChoice = new Random().nextInt(3);
-        runDelayed(() -> {
-            if (botChoice < cupsRow.getChildren().size()) {
-                StackPane targetPane = (StackPane) cupsRow.getChildren().get(botChoice);
-                targetPane.getStyleClass().removeAll("card-style-default");
-                targetPane.getStyleClass().add("card-style-selected");
-                targetPane.setTranslateY(-20);
-            }
-            runDelayed(() -> {
-                cupModal.setVisible(false);
+        // bot picks a random available cup
+        boolean[] available = game.getState().getCupsAvailable();
+        List<Integer> choices = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            if (available[i]) choices.add(i);
+        }
 
+        if (choices.isEmpty()) { updateUI(); return; }
+
+        int botChoice = choices.get(new Random().nextInt(choices.size()));
+
+        runDelayed(() -> {
+            // highlight chosen cup visually
+            if (botChoice < cupsRow.getChildren().size()) {
+                StackPane target = (StackPane) cupsRow.getChildren().get(botChoice);
+                target.getStyleClass().removeAll("card-style-default");
+                target.getStyleClass().add("card-style-selected");
+                target.setTranslateY(-20);
+            }
+
+            runDelayed(() -> {
                 int livesBefore = loser.getLives();
                 game.pickPoison(botChoice);
+                cupModal.setVisible(false);
 
                 if (loser.getLives() < livesBefore) {
                     showAnnouncement("💔 " + loser.getUsername().toUpperCase() + " LOST A LIFE! 💔", this::updateUI);
                 } else {
-                    showAnnouncement("✨ " + loser.getUsername().toUpperCase() + " SURVIVED! ✨", this::updateUI);
+                    showAnnouncement("✨ " + loser.getUsername().toUpperCase() + " SURVIVED! ✨", () -> {
+                        Player stillLoser = game.getState().getLoser();
+                        if (stillLoser != null
+                                && game.getState().getPhase() == GamePhase.PICKING_POISON) {
+                            showCupModal(stillLoser);
+                        } else {
+                            updateUI();
+                        }
+                    });
                 }
             }, 1000);
-
         }, 1200);
     }
 
