@@ -7,6 +7,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.text.Font;
+import javafx.stage.StageStyle;
 
 import java.io.IOException;
 
@@ -23,6 +24,7 @@ public class App extends Application {
 
         primary.setTitle("Asserta");
         primary.setResizable(false);
+        primary.initStyle(StageStyle.UNDECORATED);
 
         Font.loadFont(getClass().getResourceAsStream("/com/leonidasAndrei/asserta/fonts/ARCADE_I.TTF"), 12); //Arcade Interlaced
         Font.loadFont(getClass().getResourceAsStream("/com/leonidasAndrei/asserta/fonts/ARCADE_N.TTF"), 12); //Arcade Normal

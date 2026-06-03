@@ -48,6 +48,7 @@ public class GameController {
     @FXML private VBox      eliminationBox;
     @FXML private VBox      victoryBox;
     @FXML private Label     victoryLabel;
+    @FXML private VBox      settingsBox;
 
     private Game game;
     private final List<Card> selectedCards = new ArrayList<>();
@@ -286,7 +287,7 @@ public class GameController {
     // ── HUMAN HAND ────────────────────────────────────────────────────────────
     private void renderHumanHand() {
         handBox.getChildren().clear();
-        if (isDealingAnimationRunning || isSpectatingMode) return;
+        if (isSpectatingMode) return;
 
         Player human = humanPlayer();
         if (human == null || human.isEliminated()) return;
@@ -297,7 +298,6 @@ public class GameController {
             StackPane pane = new StackPane(img);
             pane.setUserData(card);
             pane.getStyleClass().add("card-container");
-
             applyCardStyle(pane, sel);
 
             pane.setOnMouseEntered(e -> {
@@ -314,7 +314,11 @@ public class GameController {
                     pane.getStyleClass().add("card-style-default");
                 }
             });
-            pane.setOnMouseClicked(e -> toggleCard(card));
+
+            if (!isDealingAnimationRunning) {
+                pane.setOnMouseClicked(e -> toggleCard(card));
+            }
+
             handBox.getChildren().add(pane);
         }
     }
@@ -587,7 +591,6 @@ public class GameController {
         });
     }
 
-     // Helper method to toggle between the modal sub-views seamlessly
         private void showModalSubView(VBox activeSubView) {
             cupModal.setVisible(true);
 
@@ -698,9 +701,9 @@ public class GameController {
             cupModal.setVisible(false);
 
             if (loser.getLives() < livesBefore) {
-                showAnnouncement("💔 " + loser.getUsername().toUpperCase() + " LOST A LIFE! 💔", this::updateUI);
+                showAnnouncement(loser.getUsername().toUpperCase() + "\nLOST A LIFE!", this::updateUI);
             } else {
-                showAnnouncement("✨ " + loser.getUsername().toUpperCase() + " SURVIVED! ✨", () -> {
+                showAnnouncement(loser.getUsername().toUpperCase() + "\nSURVIVED!", () -> {
                     Player stillLoser = game.getState().getLoser();
                     if (stillLoser != null && game.getState().getPhase() == GamePhase.PICKING_POISON) {
                         showCupModal(stillLoser);
@@ -739,9 +742,9 @@ public class GameController {
                 cupModal.setVisible(false);
 
                 if (loser.getLives() < livesBefore) {
-                    showAnnouncement("💔 " + loser.getUsername().toUpperCase() + " LOST A LIFE! 💔", this::updateUI);
+                    showAnnouncement(loser.getUsername().toUpperCase() + "\nLOST A LIFE!", this::updateUI);
                 } else {
-                    showAnnouncement("✨ " + loser.getUsername().toUpperCase() + " SURVIVED! ✨", () -> {
+                    showAnnouncement(loser.getUsername().toUpperCase() + "\nSURVIVED!", () -> {
                         Player stillLoser = game.getState().getLoser();
                         if (stillLoser != null
                                 && game.getState().getPhase() == GamePhase.PICKING_POISON) {
@@ -757,7 +760,61 @@ public class GameController {
 
     @FXML
     public void onSettingsClicked() {
-        System.out.println("SETTINGS");
+        if (game == null || game.getState().getPhase() == GamePhase.GAME_OVER) return;
+
+        cupModalOverlay.setVisible(false);
+        cupModalOverlay.setManaged(false);
+        eliminationBox.setVisible(false);
+        eliminationBox.setManaged(false);
+        victoryBox.setVisible(false);
+        victoryBox.setManaged(false);
+
+        // Display the settings frame contents
+        settingsBox.setVisible(true);
+        settingsBox.setManaged(true);
+
+        // Turn on the modal master container entirely
+        cupModal.setVisible(true);
+        cupModal.setManaged(true);
+    }
+
+    @FXML
+    public void onReturnToGameClicked() {
+        settingsBox.setVisible(false);
+        settingsBox.setManaged(false);
+
+        cupModal.setVisible(false);
+        cupModal.setManaged(false);
+        updateUI();
+    }
+
+    @FXML
+    public void onForfeitClicked() {
+        settingsBox.setVisible(false);
+        settingsBox.setManaged(false);
+
+        cupModal.setVisible(false);
+        cupModal.setManaged(false);
+
+        Player forfeiter = game.getState().getCurrentPlayer();
+        if (forfeiter == null) return;
+
+        while (!forfeiter.isEliminated()) {
+            forfeiter.loseLife();
+        }
+        game.getState().getActivePlayers().remove(forfeiter);
+
+        showAnnouncement("🏳️ " + forfeiter.getUsername().toUpperCase() + " FORFEITED 🏳️", () -> {
+            if (game.checkWinner()) {
+                updateUI();
+            } else {
+                game.nextTurn();
+                if (game.getState().getPhase() == GamePhase.PLAYING) {
+                    game.getState().setPhase(GamePhase.WAITING);
+                }
+                updateUI();
+            }
+        });
     }
 
     // ── BOT MANAGEMENT ────────────────────────────────────────────────────────
@@ -869,17 +926,22 @@ public class GameController {
         return row;
     }
 
-    private List<Player> humanFirst(List<Player> players) {
+    private List<Player> humanFirst(List<Player> playersList) {
         int hi = 0;
-        for (int i = 0; i < players.size(); i++) {
-            if (players.get(i).isHuman()) {
+        Player current = game.getState().getCurrentPlayer();
+
+        for (int i = 0; i < playersList.size(); i++) {
+            if (playersList.get(i).isHuman()) {
+                if (current != null && current.isHuman() && playersList.get(i).equals(current)) {
+                    hi = i;
+                    break;
+                }
                 hi = i;
-                break;
             }
         }
         List<Player> out = new ArrayList<>();
-        for (int i = 0; i < players.size(); i++) {
-            out.add(players.get((hi + i) % players.size()));
+        for (int i = 0; i < playersList.size(); i++) {
+            out.add(playersList.get((hi + i) % playersList.size()));
         }
         return out;
     }
