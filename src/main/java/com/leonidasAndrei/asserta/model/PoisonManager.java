@@ -1,4 +1,4 @@
-package com.leonidasAndrei.asserta.utils;
+package com.leonidasAndrei.asserta.model;
 
 import java.util.Random;
 

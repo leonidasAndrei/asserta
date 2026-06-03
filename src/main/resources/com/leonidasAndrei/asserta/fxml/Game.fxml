@@ -88,15 +88,16 @@
 
         <VBox fx:id="eliminationBox" alignment="CENTER" spacing="28" visible="false" managed="false">
             <Label fx:id="eliminatedLabel" text="ELIMINATED" alignment="CENTER"/>
-            <HBox alignment="CENTER" spacing="24">
-                <Button fx:id="spectateButton" text="SPECTATE MATCH" onAction="#onSpectateClicked"/>
-                <Button text="MAIN MENU" onAction="#onMainMenuClicked" styleClass="mainmenuButton"/>
-            </HBox>
+            <Button fx:id="spectateButton" text="SPECTATE MATCH" onAction="#onSpectateClicked"
+                    prefWidth="220"/>
+            <Button text="MAIN MENU" onAction="#onMainMenuClicked" styleClass="mainmenuButton"
+                    prefWidth="220"/>
         </VBox>
 
         <VBox fx:id="victoryBox" alignment="CENTER" spacing="28" visible="false" managed="false">
             <Label fx:id="victoryLabel" alignment="CENTER"/>
-            <Button text="MAIN MENU" onAction="#onMainMenuClicked" styleClass="mainmenuButton"/>
+            <Button text="MAIN MENU" onAction="#onMainMenuClicked" styleClass="mainmenuButton"
+                    prefWidth="220"/>
         </VBox>
     </StackPane>
 
