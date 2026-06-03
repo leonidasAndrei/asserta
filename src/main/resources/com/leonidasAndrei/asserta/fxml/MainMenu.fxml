@@ -1,21 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Pane?>
 
-<VBox xmlns="http://javafx.com/javafx"
+<Pane xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.leonidasAndrei.asserta.controller.MainMenuController"
-      alignment="CENTER"
-      spacing="24"
       prefHeight="960" prefWidth="1280"
-      styleClass="main-window"
->
+      styleClass="main-window">
 
-    <Label text="ASSERTA" styleClass="title-label, glow"/>
+    <Label text="ASSERTA"
+           layoutX="140.0" layoutY="250.0"
+           prefWidth="1000.0" alignment="CENTER"
+           styleClass="title-label, glow"/>
 
-    <Button text="PLAY" onAction="#onPlayClicked" styleClass="menu-button"/>
-    <Button text="RULES" onAction="#onRulesClicked" styleClass="menu-button"/>
-    <Button text="EXIT" onAction="#onExitClicked" styleClass="menu-button danger-button"/>
+    <Button text="PLAY"
+            onAction="#onPlayClicked"
+            layoutX="515.0" layoutY="460.0"
+            prefWidth="250.0" prefHeight="50.0"
+            styleClass="menu-button"/>
 
-</VBox>
+    <Button text="RULES"
+            onAction="#onRulesClicked"
+            layoutX="515.0" layoutY="534.0"
+            prefWidth="250.0" prefHeight="50.0"
+            styleClass="menu-button"/>
+
+
+    <Button text="QUIT"
+            onAction="#onExitClicked"
+            layoutX="515.0" layoutY="608.0"
+            prefWidth="250.0" prefHeight="50.0"
+            styleClass="menu-button, danger-button"/>
+
+</Pane>

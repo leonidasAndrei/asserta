@@ -36,16 +36,74 @@
 
 .name-field {
     -fx-max-height: 70px;
-    -fx-min-width: 500px;
+    -fx-min-width: 400px;
     -fx-background-color: -dark-forest;
     -fx-text-fill: -primary-yellow;
-    -fx-prompt-text-fill: white;
+    -fx-prompt-text-fill: -moss-green;
+    -fx-border-color: -moss-green;
+    -fx-border-width: 3px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
     -fx-font-family: "Arcade Normal";
     -fx-font-size: 13pt;
 }
 
 .name-field:focused {
     -fx-background-color: -moss-green;
+    -fx-prompt-text-fill: -dark-forest;
+    -fx-text-fill: white;
+}
+
+.lobby-card-tile-active {
+    -fx-min-width: 480px;
+    -fx-max-width: 480px;
+    -fx-min-height: 150px;
+    -fx-max-height: 150px;
+    -fx-background-color: #2E3B1C;
+    -fx-border-color: #4C5C2D;
+    -fx-border-width: 3px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-font-family: "Arcade Normal";
+}
+
+.lobby-card-tile-active .label {
+    -fx-font-size: 16pt;
+    -fx-text-fill: white;
+    -fx-padding: 10px;
+}
+
+.lobby-card-tile-empty {
+    -fx-min-width: 480px;
+    -fx-max-width: 480px;
+    -fx-min-height: 150px;
+    -fx-max-height: 150px;
+    -fx-background-color: transparent;
+    -fx-border-color: #4C5C2D;
+    -fx-border-width: 3px;
+    -fx-border-style: dashed;
+    -fx-border-radius: 8px;
+    -fx-cursor: hand;
+    -fx-font-family: "Arcade Normal";
+}
+
+.lobby-card-tile-empty:hover {
+    -fx-border-color: -primary-yellow;
+}
+
+.remove-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ff3333;
+    -fx-font-family: 'Arcade Normal';
+    -fx-font-size: 14pt;
+    -fx-padding: 5px;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-cursor: hand;
+}
+
+.remove-btn:hover {
+    -fx-text-fill: #ff6666;
 }
 
 .glow {

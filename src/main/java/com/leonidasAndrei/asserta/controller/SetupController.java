@@ -4,9 +4,12 @@ import com.leonidasAndrei.asserta.App;
 import com.leonidasAndrei.asserta.model.Game;
 import com.leonidasAndrei.asserta.model.Player;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
@@ -16,129 +19,157 @@ import java.util.List;
 
 public class SetupController {
 
-    @FXML private VBox nameFieldsBox;
+    @FXML private GridPane lobbyGrid;
+    @FXML private Label waitingStatusLabel;
     @FXML private Label errorLabel;
-    @FXML private Button addPlayerButton;
 
-    private static final int MAX_PLAYERS = 4;
+    // A single clean data structures instead of untracked UI Nodes
+    private final List<SlotState> slots = new ArrayList<>();
+    private final int MAX_PLAYERS = 4;
 
-    private final List<HBox> playerRows = new ArrayList<>();
+    // Lightweight inner state tracker to bridge Data and UI
+    private static class SlotState {
+        boolean isHuman;
+        TextField nameField; // Direct reference! No UI scraping needed.
+        String defaultBotName;
+
+        SlotState(boolean isHuman, String defaultBotName) {
+            this.isHuman = isHuman;
+            this.defaultBotName = defaultBotName;
+            this.nameField = new TextField();
+            this.nameField.setPromptText("ENTER NAME...");
+            this.nameField.getStyleClass().add("name-field");
+            this.nameField.setMaxWidth(420.0);
+
+            // Apply character limit rule directly on creation
+            this.nameField.textProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal.length() > 16) {
+                    this.nameField.setText(oldVal);
+                }
+            });
+        }
+    }
 
     @FXML
     public void initialize() {
-        addPlayerRow(); // start with 1 player
+        // Initialize our 4 states explicitly
+        slots.add(new SlotState(true, "Bot 1"));
+        slots.add(new SlotState(false, "Bot 1")); // Will be renamed sequentially on build
+        slots.add(new SlotState(false, "Bot 2"));
+        slots.add(new SlotState(false, "Bot 3"));
+
+        refreshLobbyGrid();
     }
 
-    @FXML
-    public void onAddPlayerClicked() {
-        if (playerRows.size() >= MAX_PLAYERS) return;
+    private void refreshLobbyGrid() {
+        lobbyGrid.getChildren().clear();
+        if (errorLabel != null) errorLabel.setText("");
 
-        addPlayerRow();
+        long humanCount = slots.stream().filter(s -> s.isHuman).count();
+        waitingStatusLabel.setText("Waiting for players... (" + humanCount + "/" + MAX_PLAYERS + ")");
 
-        if (playerRows.size() >= MAX_PLAYERS) {
-            addPlayerButton.setVisible(false);
-            addPlayerButton.setManaged(false);
-        }
-    }
+        int botCounter = 1;
 
-    private void addPlayerRow() {
-        HBox row = new HBox(10);
-        row.setAlignment(javafx.geometry.Pos.CENTER);
+        for (int i = 0; i < MAX_PLAYERS; i++) {
+            final int index = i;
+            SlotState slot = slots.get(i);
 
-        TextField tf = new TextField();
+            HBox cardContainer = new HBox();
+            cardContainer.setAlignment(Pos.CENTER);
+            cardContainer.setPadding(new Insets(15, 25, 15, 25));
 
-        tf.setTextFormatter(new javafx.scene.control.TextFormatter<String>(change -> { // MAX characters to 32
-            if (change.getControlNewText().length() <= 32) {
-                return change;
-            }
-            return null;
-        }));
+            VBox innerContent = new VBox();
+            innerContent.setAlignment(Pos.CENTER);
 
-        tf.setPromptText("Player " + (playerRows.size() + 1) + " name");
-        tf.getStyleClass().add("name-field");
-        tf.prefWidthProperty().bind(nameFieldsBox.widthProperty().multiply(0.5));
+            if (slot.isHuman) {
+                cardContainer.getStyleClass().add("lobby-card-tile-active");
+                innerContent.setSpacing(8);
 
-        Button removeBtn = new Button("-");
-        removeBtn.getStyleClass().add("menu-button");
-        removeBtn.getStyleClass().add("utility-btn");
+                Label headerLabel = new Label("PLAYER " + (i + 1));
+                headerLabel.getStyleClass().add("lobby-player-header-label");
 
-        removeBtn.setOnAction(e -> removePlayerRow(row));
+                Button removeBtn = new Button("X");
+                removeBtn.getStyleClass().add("remove-btn");
+                if (humanCount <= 1) removeBtn.setVisible(false);
+                removeBtn.setOnAction(e -> handleRemovePlayer(index));
 
-        row.getChildren().addAll(tf, removeBtn);
+                // Reuse the clean layout-safe textfield reference
+                innerContent.getChildren().addAll(headerLabel, slot.nameField, removeBtn);
+            } else {
+                cardContainer.getStyleClass().add("lobby-card-tile-empty");
 
-        playerRows.add(row);
-        refreshPlayerUI();
-//        nameFieldsBox.getChildren().add(row);
-    }
-    private void removePlayerRow(HBox row) {
-        if (playerRows.size() <= 1) {
-            errorLabel.setText("At least one player is required.");
-            return;
-        }
+                // Keep the internal dynamic naming correct even during shifts
+                slot.defaultBotName = "Bot " + botCounter++;
 
-        playerRows.remove(row);
+                Label botLabel = new Label(slot.defaultBotName.toUpperCase() + "\n(CLICK TO JOIN)");
+                botLabel.getStyleClass().add("lobby-player-header-label");
+                botLabel.setStyle("-fx-text-alignment: center; -fx-text-fill: #4C5C2D; -fx-font-size: 14px;");
 
-        errorLabel.setText("");
-
-        if (playerRows.size() < MAX_PLAYERS) {
-            addPlayerButton.setVisible(true);
-            addPlayerButton.setManaged(true);
-        }
-
-        refreshPlayerUI();
-    }
-
-    private void refreshPlayerUI() {
-        nameFieldsBox.getChildren().clear();
-
-        boolean canRemove = playerRows.size() > 1;
-
-        for (int i = 0; i < playerRows.size(); i++) {
-            HBox row = playerRows.get(i);
-
-            TextField tf = (TextField) row.getChildren().get(0);
-
-            Button removeBtn = (Button) row.getChildren().get(1);
-
-            tf.setPromptText("Player " + (i + 1) + " name");
-
-            removeBtn.setDisable(!canRemove);
-
-            nameFieldsBox.getChildren().add(row);
-        }
-    }
-
-    @FXML
-    public void onStartClicked() throws IOException {
-        Game game = new Game();
-
-        int index = 1;
-
-        for (HBox row : playerRows) {
-            TextField tf = (TextField) row.getChildren().get(0);
-            String name = tf.getText().trim();
-
-            if (name.isEmpty()) {
-                errorLabel.setText("Please enter a name for every player.");
-                return;
+                innerContent.getChildren().add(botLabel);
+                cardContainer.setOnMouseClicked(e -> handleAddPlayer());
             }
 
-            game.addPlayer(new Player(name, index++, true));
+            cardContainer.getChildren().add(innerContent);
+
+            int col = i % 2;
+            int row = i / 2;
+            GridPane.setHalignment(cardContainer, javafx.geometry.HPos.CENTER);
+            GridPane.setValignment(cardContainer, javafx.geometry.VPos.CENTER);
+            lobbyGrid.add(cardContainer, col, row);
         }
+    }
 
-        // fill bots
-        int humanCount = playerRows.size();
-
-        for (int i = humanCount + 1; i <= MAX_PLAYERS; i++) {
-            game.addPlayer(new Player("Bot " + (i - humanCount), i, false));
+    private void handleAddPlayer() {
+        // Find the first non-human slot and turn it active
+        for (SlotState slot : slots) {
+            if (!slot.isHuman) {
+                slot.isHuman = true;
+                slot.nameField.clear(); // Wipe text field fresh for the new user input
+                break;
+            }
         }
+        refreshLobbyGrid();
+    }
 
-        game.startGame();
-        App.switchScene("Game", game);
+    private void handleRemovePlayer(int index) {
+        // Drop the active slot item completely
+        slots.remove(index);
+        // Create an empty backfill bot target at the end of the line
+        slots.add(new SlotState(false, ""));
+        refreshLobbyGrid();
     }
 
     @FXML
     public void onBackClicked() throws IOException {
         App.switchScene("MainMenu");
+    }
+
+    @FXML
+    public void onStartClicked() throws IOException {
+        if (errorLabel != null) errorLabel.setText("");
+        Game game = new Game();
+
+        // Beautifully loop through data models directly—no node parsing!
+        for (int i = 0; i < MAX_PLAYERS; i++) {
+            SlotState slot = slots.get(i);
+            int idPosition = i + 1;
+
+            if (slot.isHuman) {
+                String name = slot.nameField.getText().trim();
+
+                if (name.isEmpty()) {
+                    if (errorLabel != null) {
+                        errorLabel.setText("Please enter a name for every player.");
+                    }
+                    return;
+                }
+                game.addPlayer(new Player(name, idPosition, true));
+            } else {
+                game.addPlayer(new Player(slot.defaultBotName, idPosition, false));
+            }
+        }
+
+        game.startGame();
+        App.switchScene("Game", game);
     }
 }
