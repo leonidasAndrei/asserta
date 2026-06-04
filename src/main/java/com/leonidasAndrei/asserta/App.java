@@ -26,8 +26,7 @@ public class App extends Application {
         primary.setResizable(false);
         primary.initStyle(StageStyle.UNDECORATED);
 
-        Font.loadFont(getClass().getResourceAsStream("/com/leonidasAndrei/asserta/fonts/ARCADE_I.TTF"), 12); //Arcade Interlaced
-        Font.loadFont(getClass().getResourceAsStream("/com/leonidasAndrei/asserta/fonts/ARCADE_N.TTF"), 12); //Arcade Normal
+        Font.loadFont(getClass().getResourceAsStream("/com/leonidasAndrei/asserta/assets/fonts/Venice-Classic.ttf"), 12); //Venice Classic
 
         switchScene("MainMenu");
 
@@ -38,7 +37,7 @@ public class App extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("/com/leonidasAndrei/asserta/fxml/" + filename + ".fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         scene.getStylesheets().add(
-                App.class.getResource("/com/leonidasAndrei/asserta/css/style.css").toExternalForm()
+                App.class.getResource("/com/leonidasAndrei/asserta/css/mystyle.css").toExternalForm()
         );
         primary.setScene(scene);
     }
@@ -50,7 +49,7 @@ public class App extends Application {
         );
         Scene scene = new Scene(loader.load());
         scene.getStylesheets().add(
-                App.class.getResource("/com/leonidasAndrei/asserta/css/style.css").toExternalForm()
+                App.class.getResource("/com/leonidasAndrei/asserta/css/mystyle.css").toExternalForm()
         );
 
         //Initialise game

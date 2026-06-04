@@ -8,30 +8,25 @@
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.leonidasAndrei.asserta.controller.MainMenuController"
       prefHeight="960" prefWidth="1280"
-      styleClass="main-window">
+      fx:id="mainMenuWindow">
 
-    <Label text="ASSERTA"
+    <!--<Label fx:id="gameTitle" text="ASSERTA"
            layoutX="140.0" layoutY="250.0"
            prefWidth="1000.0" alignment="CENTER"
-           styleClass="title-label, glow"/>
+           styleClass="title-label, glow"/>-->
 
-    <Button text="PLAY"
+    <Button fx:id="playButton"
+            text="START GAME"
             onAction="#onPlayClicked"
-            layoutX="515.0" layoutY="460.0"
-            prefWidth="250.0" prefHeight="50.0"
-            styleClass="menu-button"/>
+            layoutX="465.0" layoutY="490.0"
+            minWidth="350.0" minHeight="50.0"
+            styleClass="menuBtn, actionBtn"/>
 
-    <Button text="RULES"
-            onAction="#onRulesClicked"
-            layoutX="515.0" layoutY="534.0"
-            prefWidth="250.0" prefHeight="50.0"
-            styleClass="menu-button"/>
-
-
-    <Button text="QUIT"
+    <Button fx:id="exitButton"
+            text="EXIT"
             onAction="#onExitClicked"
-            layoutX="515.0" layoutY="608.0"
-            prefWidth="250.0" prefHeight="50.0"
-            styleClass="menu-button, danger-button"/>
+            layoutX="465.0" layoutY="600.0"
+            minWidth="350.0" minHeight="50.0"
+            styleClass="menuBtn, dangerBtn"/>
 
 </Pane>

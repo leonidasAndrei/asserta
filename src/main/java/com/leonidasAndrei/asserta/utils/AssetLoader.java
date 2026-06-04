@@ -7,15 +7,15 @@ import java.io.InputStream;
 
 public class AssetLoader {
     public static ImageView loadCupImage(int index, double w, double h) {
-        return loadImage("/com/leonidasAndrei/asserta/images/bottles/" + index + ".png", w, h);
+        return loadImage("/com/leonidasAndrei/asserta/assets/images/bottles/" + index + ".png", w, h);
     }
 
     public static ImageView loadCardBack(double w, double h) {
-        return loadImage("/com/leonidasAndrei/asserta/images/cards/back/0.png", w, h);
+        return loadImage("/com/leonidasAndrei/asserta/assets/images/cards/back/0.png", w, h);
     }
 
     public static ImageView loadCardFront(Card card, double w, double h) {
-        String path = "/com/leonidasAndrei/asserta/images/cards/front/"
+        String path = "/com/leonidasAndrei/asserta/assets/images/cards/front/"
                 + card.getSuit().name().toLowerCase() + "/" + card.getRank() + ".png";
         return loadImage(path, w, h);
     }
