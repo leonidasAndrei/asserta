@@ -3,6 +3,7 @@ package com.leonidasAndrei.asserta.controller;
 import com.leonidasAndrei.asserta.App;
 import com.leonidasAndrei.asserta.model.Game;
 import com.leonidasAndrei.asserta.model.Player;
+import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -11,7 +12,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,9 +22,9 @@ import java.util.List;
 
 public class SetupController {
 
+    @FXML private Pane lobbyWindow;
     @FXML private GridPane lobbyGrid;
-    @FXML private Label waitingStatusLabel;
-    @FXML private Label errorLabel;
+    @FXML private Label lobbyStatusLbl, errorLbl;
 
     // A single clean data structures instead of untracked UI Nodes
     private final List<SlotState> slots = new ArrayList<>();
@@ -54,19 +57,22 @@ public class SetupController {
     public void initialize() {
         // Initialize our 4 states explicitly
         slots.add(new SlotState(true, "Bot 1"));
-        slots.add(new SlotState(false, "Bot 1")); // Will be renamed sequentially on build
+        slots.add(new SlotState(false, "Bot 1"));
         slots.add(new SlotState(false, "Bot 2"));
         slots.add(new SlotState(false, "Bot 3"));
 
+        javafx.application.Platform.runLater(() -> {
+            lobbyWindow.requestFocus();
+        });
         refreshLobbyGrid();
     }
 
     private void refreshLobbyGrid() {
         lobbyGrid.getChildren().clear();
-        if (errorLabel != null) errorLabel.setText("");
+        if (errorLbl != null) errorLbl.setText("");
 
         long humanCount = slots.stream().filter(s -> s.isHuman).count();
-        waitingStatusLabel.setText("Waiting for players... (" + humanCount + "/" + MAX_PLAYERS + ")");
+        lobbyStatusLbl.setText("Waiting for players... (" + humanCount + "/" + MAX_PLAYERS + ")");
 
         int botCounter = 1;
 
@@ -88,8 +94,8 @@ public class SetupController {
                 Label headerLabel = new Label("PLAYER " + (i + 1));
                 headerLabel.getStyleClass().add("lobby-player-header-label");
 
-                Button removeBtn = new Button("X");
-                removeBtn.getStyleClass().add("remove-btn");
+                Button removeBtn = new Button("REMOVE");
+                removeBtn.getStyleClass().addAll("removeSlotBtn", "menuBtn", "dangerBtn");
                 if (humanCount <= 1) removeBtn.setVisible(false);
                 removeBtn.setOnAction(e -> handleRemovePlayer(index));
 
@@ -103,8 +109,6 @@ public class SetupController {
 
                 Label botLabel = new Label(slot.defaultBotName.toUpperCase() + "\n(CLICK TO JOIN)");
                 botLabel.getStyleClass().add("lobby-player-header-label");
-                botLabel.setStyle("-fx-text-alignment: center; -fx-text-fill: #4C5C2D; -fx-font-size: 14px;");
-
                 innerContent.getChildren().add(botLabel);
                 cardContainer.setOnMouseClicked(e -> handleAddPlayer());
             }
@@ -146,21 +150,26 @@ public class SetupController {
 
     @FXML
     public void onStartClicked() throws IOException {
-        if (errorLabel != null) errorLabel.setText("");
+        if (errorLbl != null) errorLbl.setText("");
+
+        // Count human players
+        long humanCount = slots.stream().filter(s -> s.isHuman).count();
+
+        if (humanCount == 0) {
+            showError("You must add at least one human player.");
+            return;
+        }
+
         Game game = new Game();
 
-        // Beautifully loop through data models directly—no node parsing!
         for (int i = 0; i < MAX_PLAYERS; i++) {
             SlotState slot = slots.get(i);
             int idPosition = i + 1;
 
             if (slot.isHuman) {
                 String name = slot.nameField.getText().trim();
-
                 if (name.isEmpty()) {
-                    if (errorLabel != null) {
-                        errorLabel.setText("Please enter a name for every player.");
-                    }
+                    showError("Please enter a name for every player.");
                     return;
                 }
                 game.addPlayer(new Player(name, idPosition, true));
@@ -171,5 +180,15 @@ public class SetupController {
 
         game.startGame();
         App.switchScene("Game", game);
+    }
+
+    // Helper to keep code clean
+    private void showError(String message) {
+        if (errorLbl != null) {
+            errorLbl.setText(message);
+            PauseTransition delay = new PauseTransition(Duration.seconds(3));
+            delay.setOnFinished(e -> errorLbl.setText(""));
+            delay.play();
+        }
     }
 }

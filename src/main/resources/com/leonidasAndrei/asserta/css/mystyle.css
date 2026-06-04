@@ -2,7 +2,7 @@
     -wood: #5D3621;
     -leather: #8C704F;
     -parchment: #DCC393;
-    -gold-trim: #FFD700;
+    -gold-trim: #FFBF00;
     -banner-red: #7F1816;
     -banner-blue: #134579;
     -banner-green: #14731A;
@@ -74,9 +74,134 @@
             radial-gradient(center 50% 50%, radius 100%, #932A2A, #661616);
 }
 
+.successBtn {
+    -fx-background-color:
+            linear-gradient(from 0% 93% to 0% 100%, #122614 0%, #0A140B 100%), /* 3D Shadow Base */
+            #1D3D1F, /* Mid Lip */
+            #3E7341, /* Top Rim Highlight */
+            radial-gradient(center 50% 50%, radius 100%, #14731A, #0A3D0E); /* Jewel Core */
+}
+
+.successBtn:hover {
+    -fx-background-color:
+            linear-gradient(from 0% 93% to 0% 100%, #122614 0%, #0A140B 100%),
+            #1D3D1F,
+            #4E9352, /* Brightens on Hover */
+            radial-gradient(center 50% 50%, radius 100%, #209E27, #0F5C13);
+}
+
 #lobbyWindow {
     -fx-background-image: url("./../assets/images/background/bg-lobby.png");
     -fx-background-size: cover;
     -fx-background-position: center center;
     -fx-background-repeat: no-repeat;
+}
+#lobbyTitleTxt {
+    -fx-font-family: "Venice Classic";
+    -fx-font-size: 104pt;
+    -fx-fill: linear-gradient(to bottom, #BF9B30 0%, -gold-trim 16.67%, #FFCF40 33.33%, #FFDC73 50%, #FFCF40 66.67%, -gold-trim 83.34%, #BF9B30 100%);
+    -fx-stroke: #000000;
+    -fx-stroke-width: 3px;
+    -fx-stroke-type: OUTSIDE;
+    -fx-stroke-line-join: bevel;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.5), 0, 8, 0, 0);
+}
+
+#lobbyStatusLbl {
+    -fx-font-family: "Venice Classic";
+    -fx-font-size: 16pt;
+
+}
+
+.errorLbl {
+    -fx-font-family: "Venice Classic";
+    -fx-text-fill: -banner-red;
+    -fx-font-size: 16pt;
+}
+
+
+
+
+.lobby-card-tile-active {
+    -fx-font-family: "Venice Classic";
+    -fx-background-color: -parchment;
+    -fx-border-color: -wood;
+    -fx-border-width: 3px;
+
+    -fx-min-width: 480px;
+    -fx-max-width: 480px;
+    -fx-min-height: 170px;
+    -fx-max-height: 170px;
+}
+
+.lobby-card-tile-active .label {
+    -fx-font-size: 24pt;
+    -fx-text-fill: -wood;
+    -fx-padding: 10px;
+}
+
+.lobby-card-tile-active .name-field{
+    -fx-font-family: "Venice Classic";
+    -fx-font-size: 16pt;
+    -fx-text-fill: -leather;
+    -fx-background-color: -parchment;
+    -fx-prompt-text-fill: -leather;
+    -fx-border-color: -leather;
+    -fx-border-width: 3px;
+
+    -fx-max-height: 70px;
+    -fx-min-width: 400px;
+}
+
+.lobby-card-tile-active .name-field:focused {
+    -fx-background-color: -leather;
+    -fx-text-fill: -parchment;
+    -fx-prompt-text-fill: -parchment;
+}
+
+.lobby-card-tile-empty {
+    -fx-font-family: "Venice Classic";
+    -fx-background-color: transparent;
+    -fx-border-color: -leather;
+    -fx-border-width: 3px;
+    -fx-border-style: dashed;
+    -fx-cursor: hand;
+
+    -fx-min-width: 480px;
+    -fx-max-width: 480px;
+    -fx-min-height: 170px;
+    -fx-max-height: 170px;
+}
+
+.lobby-card-tile-empty:hover {
+    -fx-border-color: -wood;
+    -fx-background-color: -parchment;
+    -fx-border-style: solid;
+}
+
+.lobby-player-header-label {
+    -fx-text-fill: -wood;
+    -fx-font-size: 24pt;
+    -fx-text-alignment: center;
+}
+
+.removeSlotBtn {
+    -fx-font-size: 14pt;
+    -fx-max-height: 16pt;
+}
+
+.iconBtn {
+    -fx-font-family: "Venice Classic";
+    -fx-font-size: 40pt;
+    -fx-text-fill: -gold-trim;
+
+    -fx-min-width: 55px;
+    -fx-min-height: 55px;
+    -fx-max-width: 55px;
+    -fx-max-height: 55px;
+
+    -fx-background-radius: 50em;
+    -fx-border-radius: 50em;
+
+    -fx-padding: -5 3 0 0;
 }
