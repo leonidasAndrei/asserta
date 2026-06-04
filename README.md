@@ -1,6 +1,34 @@
 # Asserta
 
-Asserta is a desktop strategy game where deception, bluffing, and a healthy dose of luck are the keys to victory. Outsmart your opponents, master your poker face, and play your cards right to win.
+Asserta is a game of psychological warfare. Survival depends on your ability to read your opponent, execute flawless bluffs, and know when to trust your luck.
+
+---
+
+## How to Play
+
+
+### 1. Deck Composition & Hand Rules
+* **The Hand:** Every player starts the game with a hand of **5 cards**.
+* **The Deck:** The playing deck consists of 20-card setup containing:
+  * **6 Kings** (K)
+  * **6 Queens** (Q)
+  * **6 Aces** (A)
+  * **2 Wildcards / Jokers** (Can legally act as the declared rank for the current round).
+
+### 2. Turn Actions
+On your turn, you have two choices:
+* **Bluff / Play:** Place 1 to 3 cards face-down and declare that they match the current table round (e.g., King, Queen, or Ace). *You do not have to tell the truth.*
+* **Call Bluff!:** Accuse the previous player of lying about their cards.
+
+### 3. The Consequence
+When a bluff is called, the played cards are shown:
+* **If they lied:** The liar must pick one of the **4 drinks** on the table.
+* **If they told the truth:** The accuser must pick one of the **4 drinks** instead.
+
+One of the four drinks is laced with **poison**. If a player drinks the poison, they are permanently eliminated.<br>
+If they survive, the remaining drinks are left on the table—making the risk of drinking the poison even higher for the next unlucky soul.
+
+**The last player left standing wins!**
 
 ---
 
