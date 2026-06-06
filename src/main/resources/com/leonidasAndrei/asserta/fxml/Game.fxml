@@ -3,18 +3,19 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.*?>
 
+<?import javafx.scene.text.Text?>
 <Pane xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:id="rootPane"
+      fx:id="gameWindow"
       fx:controller="com.leonidasAndrei.asserta.controller.GameController"
       prefHeight="960" prefWidth="1280">
-
+<!--
     <Pane fx:id="tableFelt" layoutX="140" layoutY="180" prefWidth="1000" prefHeight="600"/>
-    <Pane fx:id="tableRing" layoutX="165" layoutY="205" prefWidth="950" prefHeight="550"/>
+    <Pane fx:id="tableRing" layoutX="165" layoutY="205" prefWidth="950" prefHeight="550"/>-->
 
     <Label fx:id="roundLabel" layoutX="940" layoutY="30" prefWidth="300" alignment="CENTER_RIGHT"/>
 
-    <StackPane fx:id="deckZone" layoutX="588" layoutY="407" prefWidth="104" prefHeight="146"/>
+    <StackPane fx:id="deckZone" layoutX="588" layoutY="427" prefWidth="104" prefHeight="146"/>
 
     <Label fx:id="declaredRankLabel"
            layoutX="440" layoutY="585"
@@ -27,7 +28,7 @@
             text="&lt;"
             layoutX="24" layoutY="24"
             onAction="#onSettingsClicked"
-            styleClass="menu-button, utility-btn"
+            styleClass="iconBtn, dangerBtn"
     />
 
     <HBox fx:id="actionBar"
@@ -38,21 +39,26 @@
           visible="false">
 
         <Button fx:id="callBluffButton"
-                text="CALL BLUFF"
+                text="LIAR!"
                 onAction="#onCallBluffClicked"
+                styleClass="menuBtn, dangerBtn"
+                prefWidth="220.0"
         />
 
         <HBox fx:id="handBox" alignment="CENTER" spacing="8"/>
 
         <Button fx:id="playButton"
-                text="PLAY CARDS"
+                text="PLAY"
                 onAction="#onPlayClicked"
                 visible="false"
-                disable="true"/>
+                disable="true"
+                styleClass="menuBtn, actionBtn"
+                prefWidth="220.0"
+        />
     </HBox>
 
     <Label fx:id="messageLabel"
-           layoutX="390" layoutY="742"
+           layoutX="390" layoutY="390"
            prefWidth="500"
            alignment="CENTER"
            wrapText="true"
@@ -60,15 +66,14 @@
 
     <StackPane fx:id="bluffOverlay" prefWidth="1280" prefHeight="960" visible="false" mouseTransparent="true"
                style="-fx-background-color: rgba(0,0,0,0.85);">
-        <Label fx:id="bluffLabel" text="BLUFF CALLED!"/>
+        <Text fx:id="bluffTxt" text="BLUFF CALLED!" styleClass="red-effect"/>
     </StackPane>
 
     <StackPane fx:id="announcementOverlay" prefWidth="1280" prefHeight="960" visible="false" mouseTransparent="true"
                style="-fx-background-color: rgba(0,0,0,0.85);">
-        <Label fx:id="announcementLabel"/>
+        <Text styleClass="gold-effect" fx:id="announcementTxt" />
     </StackPane>
 
-    <!-- FIX: Removed mouseTransparent="true" and added managed="false" -->
     <StackPane fx:id="cupModal" alignment="CENTER" prefWidth="1280" prefHeight="960" visible="false"
                style="-fx-background-color: rgba(0,0,0,0.78);">
         <VBox fx:id="cupModalOverlay" alignment="CENTER" spacing="24" visible="false" managed="false">
@@ -77,27 +82,29 @@
 
         <VBox fx:id="settingsBox" alignment="CENTER" spacing="28" visible="false" managed="false">
             <Label fx:id="settingsLabel" text="GAME PAUSED" alignment="CENTER"/>
-            <Button fx:id="returnButton" text="RETURN" onAction="#onReturnToGameClicked"
-                    prefWidth="220"/>
-            <Button fx:id="forfeitButton" text="FORFEIT" onAction="#onForfeitClicked"
-                    prefWidth="220"/>
+            <Button fx:id="returnButton" text="RETURN" onAction="#onReturnToGameClicked" styleClass="menuBtn, successBtn"
+                    minWidth="300.0"/>
+            <Button fx:id="forfeitButton" text="FORFEIT" onAction="#onForfeitClicked" styleClass="menuBtn, actionBtn"
+                    minWidth="300.0"/>
             <Button text="MAIN MENU" onAction="#onMainMenuClicked"
-                    styleClass="mainmenuButton"
-                    prefWidth="220"/>
+                    styleClass="menuBtn, dangerBtn"
+                    minWidth="300.0"/>
         </VBox>
 
         <VBox fx:id="eliminationBox" alignment="CENTER" spacing="28" visible="false" managed="false">
             <Label fx:id="eliminatedLabel" text="ELIMINATED" alignment="CENTER"/>
-            <Button fx:id="spectateButton" text="SPECTATE MATCH" onAction="#onSpectateClicked"
-                    prefWidth="220"/>
-            <Button text="MAIN MENU" onAction="#onMainMenuClicked" styleClass="mainmenuButton"
-                    prefWidth="220"/>
+            <Button fx:id="spectateButton" text="SPECTATE" onAction="#onSpectateClicked" styleClass="menuBtn, actionBtn"
+                    minWidth="300.0"/>
+            <Button text="MAIN MENU" onAction="#onMainMenuClicked" styleClass="menuBtn, dangerBtn"
+                    minWidth="300.0"/>
         </VBox>
 
         <VBox fx:id="victoryBox" alignment="CENTER" spacing="28" visible="false" managed="false">
             <Label fx:id="victoryLabel" alignment="CENTER"/>
-            <Button text="MAIN MENU" onAction="#onMainMenuClicked" styleClass="mainmenuButton"
-                    prefWidth="220"/>
+            <Button text="REMATCH" onAction="#onMainMenuClicked" styleClass="menuBtn, successBtn"
+                    minWidth="300.0"/>
+            <Button text="MAIN MENU" onAction="#onMainMenuClicked" styleClass="menuBtn, dangerBtn"
+                    minWidth="300.0"/>
         </VBox>
     </StackPane>
 

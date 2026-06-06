@@ -43,10 +43,10 @@ public class AnimationHelper {
 
     public static double[] getBotSeatScenePosition(int seatIndex) {
         return switch (seatIndex) {
-            case 1 -> new double[]{130, 480};
-            case 2 -> new double[]{640, 85};
-            case 3 -> new double[]{1150, 480};
-            default -> new double[]{640, 770};
+            case 1 -> new double[]{280, 500};
+            case 2 -> new double[]{640, 280};
+            case 3 -> new double[]{1003, 500};
+            default -> new double[]{640, 880};
         };
     }
 }

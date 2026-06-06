@@ -17,7 +17,7 @@
 
     <VBox prefWidth="1280.0" prefHeight="960.0" alignment="CENTER">
         <!-- Top Header -->
-        <Text text="LOBBY" fx:id="lobbyTitleTxt"/>
+        <Text text="LOBBY" fx:id="lobbyTitleTxt" styleClass="gold-effect"/>
 
         <GridPane fx:id="lobbyGrid" alignment="CENTER" hgap="40" vgap="40" VBox.vgrow="ALWAYS">
             <padding>

@@ -18,6 +18,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 import java.io.IOException;
@@ -27,12 +28,13 @@ import java.util.Random;
 
 public class GameController {
 
-    @FXML private Pane      rootPane, seatsPane;
+    @FXML private Pane      gameWindow, seatsPane;
     @FXML private StackPane deckZone, bluffOverlay, cupModal, announcementOverlay;
-    @FXML private Label     declaredRankLabel, roundLabel, messageLabel, bluffLabel, announcementLabel, cupModalTitle, victoryLabel;
+    @FXML private Label     declaredRankLabel, roundLabel, messageLabel, cupModalTitle, victoryLabel;
     @FXML private HBox      handBox, actionBar;
     @FXML private Button    callBluffButton, playButton;
     @FXML private VBox      cupModalOverlay, eliminationBox, victoryBox, settingsBox;
+    @FXML private Text      announcementTxt, bluffTxt;
 
     private Game game;
     private final List<Card> selectedCards = new ArrayList<>();
@@ -145,7 +147,7 @@ public class GameController {
         List<Card> table = game.getState().getTableCards();
 
         if (table.isEmpty()) {
-            Rectangle r = new Rectangle(96, 136);
+            Rectangle r = new Rectangle(64, 96);
             r.setFill(Color.TRANSPARENT);
             r.setStroke(Color.web("#1a5230"));
             r.setStrokeWidth(2);
@@ -162,7 +164,7 @@ public class GameController {
         int layers = Math.min(table.size(), rots.length);
 
         for (int i = 0; i < layers; i++) {
-            ImageView iv = AssetLoader.loadCardBack(96, 136);
+            ImageView iv = AssetLoader.loadCardBack(64, 96);
             iv.setRotate(rots[i]);
             iv.setTranslateX(txs[i]);
             iv.setTranslateY(tys[i]);
@@ -187,9 +189,20 @@ public class GameController {
                 seat.setUserData(ordered.get(i));
 
                 switch (i) {
-                    case 1 -> { seat.setRotate(90); seat.setLayoutX(130 - (boxWidth / 2)); seat.setLayoutY(480 - (boxHeight / 2)); }
-                    case 3 -> { seat.setRotate(-90); seat.setLayoutX(1150 - (boxWidth / 2)); seat.setLayoutY(480 - (boxHeight / 2)); }
-                    case 2 -> { seat.setLayoutX(640 - (boxWidth / 2)); seat.setLayoutY(85 - (boxHeight / 2)); }
+                    case 1 -> {
+                        seat.setRotate(90);
+                        seat.setLayoutX(280 - (boxWidth / 2));
+                        seat.setLayoutY(500 - (boxHeight / 2));
+                    }
+                    case 3 -> {
+                        seat.setRotate(-90);
+                        seat.setLayoutX(1003 - (boxWidth / 2));
+                        seat.setLayoutY(500 - (boxHeight / 2));
+                    }
+                    case 2 -> {
+                        seat.setLayoutX(640 - (boxWidth / 2));
+                        seat.setLayoutY(270 - (boxHeight / 2));
+                    }
                     default -> { seat.setLayoutX(640 - (boxWidth / 2)); seat.setLayoutY(932 - (boxHeight / 2)); }
                 }
                 seatsPane.getChildren().add(seat);
@@ -210,8 +223,8 @@ public class GameController {
 
                 if (isEliminated) {
                     name.getStyleClass().removeAll("name-node-active", "name-node-inactive");
-                    name.setStyle("-fx-text-fill: #555555; -fx-background-color: #222222;");
-                    seat.setOpacity(0.35);
+                    name.setStyle("-fx-text-fill: -banner-red; -fx-background-color: #222222;");
+                    seat.setOpacity(0.5);
                 } else {
                     seat.setOpacity(1.0);
                 }
@@ -313,7 +326,7 @@ public class GameController {
                     dealingCard.setLayoutY(DECK_CY - (targetHeight / 2));
                     dealingCard.setOpacity(0.0);
                     dealingCard.getStyleClass().add("card-style-default");
-                    rootPane.getChildren().add(dealingCard);
+                    gameWindow.getChildren().add(dealingCard);
 
                     TranslateTransition fly = new TranslateTransition(Duration.millis(320), dealingCard);
                     fly.setToX(targetPos[0] - DECK_CX);
@@ -323,7 +336,7 @@ public class GameController {
                     reveal.setToValue(1.0);
 
                     ParallelTransition group = new ParallelTransition(fly, reveal);
-                    group.setOnFinished(evt -> rootPane.getChildren().remove(dealingCard));
+                    group.setOnFinished(evt -> gameWindow.getChildren().remove(dealingCard));
                     group.play();
                 });
                 dealerTimeline.getKeyFrames().add(cardFrame);
@@ -342,7 +355,7 @@ public class GameController {
     }
 
     private void showAnnouncement(String text, Runnable after) {
-        announcementLabel.setText(text);
+        announcementTxt.setText(text);
         announcementOverlay.setOpacity(0);
         announcementOverlay.setVisible(true);
 
@@ -366,7 +379,7 @@ public class GameController {
 
         FadeTransition fadeIn = new FadeTransition(Duration.millis(250), bluffOverlay);
         fadeIn.setToValue(1.0);
-        ScaleTransition scale = new ScaleTransition(Duration.millis(250), bluffLabel);
+        ScaleTransition scale = new ScaleTransition(Duration.millis(250), bluffTxt);
         scale.setFromX(0.4); scale.setToX(1.0); scale.setFromY(0.4); scale.setToY(1.0);
 
         ParallelTransition show = new ParallelTransition(fadeIn, scale);
@@ -393,7 +406,7 @@ public class GameController {
             ImageView ghost = AssetLoader.loadCardBack(96, 136);
             ghost.setLayoutX(pos[0] - 48); ghost.setLayoutY(pos[1] - 68);
             ghost.getStyleClass().add("card-style-default");
-            rootPane.getChildren().add(ghost);
+            gameWindow.getChildren().add(ghost);
 
             TranslateTransition fly = new TranslateTransition(Duration.millis(380), ghost);
             fly.setToX(DECK_CX - pos[0]); fly.setToY(DECK_CY - pos[1]);
@@ -406,7 +419,7 @@ public class GameController {
 
             ParallelTransition anim = new ParallelTransition(fly, fade, shrink);
             anim.setOnFinished(e -> {
-                rootPane.getChildren().remove(ghost);
+                gameWindow.getChildren().remove(ghost);
                 if (++done[0] == sourcePositions.size()) after.run();
             });
             anim.play();
@@ -505,7 +518,7 @@ public class GameController {
 
     private void showFinalWinnerOverlay() {
         List<Player> remaining = game.getState().getActivePlayers().stream().filter(p -> !p.isEliminated()).toList();
-        victoryLabel.setText((remaining.isEmpty() ? "PLAYER" : remaining.get(0).getUsername().toUpperCase()) + "IS VICTORIOUS!");
+        victoryLabel.setText((remaining.isEmpty() ? "PLAYER" : remaining.get(0).getUsername().toUpperCase()) + " IS VICTORIOUS!");
         showModalSubView(victoryBox);
     }
 
@@ -604,6 +617,11 @@ public class GameController {
                 startNewRoundSequence();
             }
         });
+    }
+
+    @FXML
+    public void onRematchClicked() {
+
     }
 
     // ── BOT MANAGEMENT ────────────────────────────────────────────────────────

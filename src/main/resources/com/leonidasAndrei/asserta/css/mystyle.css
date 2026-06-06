@@ -90,6 +90,14 @@
             radial-gradient(center 50% 50%, radius 100%, #209E27, #0F5C13);
 }
 
+.gold-effect {
+    -fx-fill: linear-gradient(to bottom, #BF9B30 0%, -gold-trim 16.67%, #FFCF40 33.33%, #FFDC73 50%, #FFCF40 66.67%, -gold-trim 83.34%, #BF9B30 100%);
+}
+
+.red-effect {
+    -fx-fill: linear-gradient(to bottom, #4D0C0B 0%, #7F1816 16.67%, #B52B28 33.33%, #FFA1A0 50%, #B52B28 66.67%, #7F1816 83.34%, #4D0C0B 100%);
+}
+
 #lobbyWindow {
     -fx-background-image: url("./../assets/images/background/bg-lobby.png");
     -fx-background-size: cover;
@@ -99,7 +107,6 @@
 #lobbyTitleTxt {
     -fx-font-family: "Venice Classic";
     -fx-font-size: 104pt;
-    -fx-fill: linear-gradient(to bottom, #BF9B30 0%, -gold-trim 16.67%, #FFCF40 33.33%, #FFDC73 50%, #FFCF40 66.67%, -gold-trim 83.34%, #BF9B30 100%);
     -fx-stroke: #000000;
     -fx-stroke-width: 3px;
     -fx-stroke-type: OUTSIDE;
@@ -204,4 +211,145 @@
     -fx-border-radius: 50em;
 
     -fx-padding: -5 3 0 0;
+}
+
+/*===============================GAME===========================*/
+
+#gameWindow {
+    -fx-background-image: url("./../assets/images/background/bg-game.png");
+    -fx-background-size: cover;
+    -fx-background-position: center center;
+    -fx-background-repeat: no-repeat;
+}
+
+#gameWindow .label {
+    -fx-font-family: "Venice Classic";
+}
+
+#roundLabel {
+    -fx-font-size: 16pt;
+    -fx-text-fill: -gold-trim;
+    -fx-font-weight: bold;
+}
+
+#declaredRankLabel {
+    -fx-font-size: 36pt;
+    -fx-text-fill: #1a5230;
+    -fx-font-weight: bold;
+}
+
+#messageLabel {
+    -fx-font-size: 16pt;
+    -fx-text-fill: -gold-trim;
+}
+
+#bluffTxt {
+    -fx-font-family: "Venice Classic";
+    -fx-font-size: 104pt;
+    -fx-text-fill: -banner-red;
+    -fx-font-weight: bold;
+}
+
+#announcementTxt {
+    -fx-font-family: "Venice Classic";
+    -fx-font-size: 104pt;
+    -fx-text-fill: -gold-trim;
+    -fx-font-weight: bold;
+    -fx-text-alignment: center;
+}
+
+.seat-box {
+    -fx-background-color: transparent;
+    -fx-alignment: center;
+}
+
+.name-label-node {
+    -fx-font-size: 16pt;
+    -fx-padding: 6px 14px;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+}
+
+.name-node-inactive {
+    -fx-text-fill: #888888;
+    -fx-background-color: #121212;
+    -fx-border-color: #333333;
+    -fx-border-width: 1px;
+}
+
+.name-node-active {
+    -fx-text-fill: #000000;
+    -fx-background-color: #FFDE42;
+    -fx-border-color: #FFCF00;
+    -fx-border-width: 1.5px;
+    -fx-effect: dropshadow(gaussian, #FFDE42, 20, 0.55, 0, 0);
+}
+
+.seat-box-active {
+    -fx-effect: dropshadow(gaussian, #FFDE42, 25, 0.5, 0, 0);
+}
+
+/* ── HUMAN HAND CARD CONTAINERS & SELECTION EFFECTS ── */
+.card-container {
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-padding: 2px; /* Leaves clean spacing for selection borders */
+    -fx-cursor: hand;
+}
+
+.card-style-default {
+    -fx-border-color: transparent;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.4), 6, 0, 0, 2);
+}
+
+.card-style-hover {
+    -fx-border-color: rgba(255, 222, 66, 0.4);
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(three-pass-box, rgba(255, 222, 66, 0.3), 10, 0, 0, 0);
+}
+
+.card-style-selected {
+    -fx-border-color: #FFDE42;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(three-pass-box, #FFDE42, 16, 0.45, 0, 0);
+}
+
+#cupModalOverlay, #eliminationBox, #victoryBox, #settingsBox {
+    -fx-background-color: #101010;
+    -fx-border-color: #c9a84c;
+    -fx-border-width: 1.5;
+    -fx-padding: 44 52;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-max-width: 860;
+    -fx-max-height: 460;
+}
+
+#cupModalTitle {
+    -fx-font-size: 32pt;
+    -fx-text-fill: -gold-trim;
+    -fx-font-weight: bold;
+    -fx-text-alignment: center;
+}
+
+#settingsLabel {
+    -fx-font-size: 48pt;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+#eliminatedLabel {
+    -fx-text-fill: -banner-red;
+    -fx-font-size: 96pt;
+    -fx-font-weight: bold;
+    -fx-text-alignment: center;
+}
+
+#victoryLabel {
+    -fx-text-fill: -gold-trim;
+    -fx-font-size: 48pt;
+    -fx-font-weight: bold;
+    -fx-text-alignment: center;
+    -fx-font-family: "Venice Classic";
 }
