@@ -43,6 +43,8 @@ public class GameController {
     private boolean isSpectatingMode = false;
     private String lastActionMessage = "";
     private Timeline messageTimer;
+    private Player lastActiveHuman = null;
+    private boolean isPaused = false;
 
     private static final double DECK_CX = 640;
     private static final double DECK_CY = 480;
@@ -55,6 +57,8 @@ public class GameController {
         this.isInitialStartDone = false;
         this.isSpectatingMode = false;
         this.lastActionMessage = "";
+        this.lastActiveHuman = null;
+        this.isPaused = false;
         if (messageTimer != null) messageTimer.stop();
 
         seatsPane.getChildren().clear();
@@ -114,7 +118,10 @@ public class GameController {
             }
             default -> {
                 cupModal.setVisible(false);
-                if (current != null && (!current.isHuman() || current.isEliminated() || isSpectatingMode) && !isDealingAnimationRunning) {
+                if (!isPaused
+                        && current != null
+                        && (!current.isHuman() || current.isEliminated() || isSpectatingMode)
+                        && !isDealingAnimationRunning) {
                     handleBotTurn();
                 }
             }
@@ -250,10 +257,18 @@ public class GameController {
         handBox.getChildren().clear();
         if (isSpectatingMode) return;
 
-        Player human = humanPlayer();
-        if (human == null || human.isEliminated()) return;
+        // show the CURRENT player's hand, not always the first human
+        Player current = game.getState().getCurrentPlayer();
+        if (current == null || !current.isHuman() || current.isEliminated()) return;
 
-        for (Card card : human.getHand()) {
+        // clear selection when a different human's turn starts
+        if (lastActiveHuman != current) {
+            selectedCards.clear();
+            playButton.setDisable(true);
+            lastActiveHuman = current;
+        }
+
+        for (Card card : current.getHand()) {
             boolean sel = isSelectedByIdentity(card);
             StackPane pane = new StackPane(AssetLoader.loadCardFront(card, 96, 136));
             pane.setUserData(card);
@@ -274,9 +289,7 @@ public class GameController {
                     pane.getStyleClass().add("card-style-default");
                 }
             });
-
             if (!isDealingAnimationRunning) pane.setOnMouseClicked(e -> toggleCard(card));
-
             handBox.getChildren().add(pane);
         }
     }
@@ -586,11 +599,16 @@ public class GameController {
 
     @FXML
     public void onSettingsClicked() {
-        if (game != null && game.getState().getPhase() != GamePhase.GAME_OVER) showModalSubView(settingsBox);
+        if (game != null && game.getState().getPhase() != GamePhase.GAME_OVER) {
+            isPaused = true;
+            showModalSubView(settingsBox);
+        }
     }
+
 
     @FXML
     public void onReturnToGameClicked() {
+        isPaused = false;
         cupModal.setVisible(false);
         cupModal.setManaged(false);
         updateUI();
@@ -630,15 +648,20 @@ public class GameController {
         final int finalSeatIndex = getPlayerSeatIndex(currentBot);
 
         AnimationHelper.runDelayed(() -> {
+            if (isPaused) return;
             List<Card> played = game.playBotTurn();
             if (!played.isEmpty()) {
                 if (currentBot != null) {
-                    startActionMessageTimer(currentBot.getUsername().toUpperCase() + " PLAYS " + played.size() + " " + game.getState().getDeclaredSymbol().toUpperCase() + "(s)");
+                    startActionMessageTimer(currentBot.getUsername().toUpperCase()
+                            + " PLAYS " + played.size() + " "
+                            + game.getState().getDeclaredSymbol().toUpperCase() + "(s)");
                 }
                 List<double[]> positions = new ArrayList<>();
                 double[] base = AnimationHelper.getBotSeatScenePosition(finalSeatIndex);
                 for (int i = 0; i < played.size(); i++) {
-                    positions.add(new double[]{ base[0] + (i - played.size() / 2.0) * 16, base[1] });
+                    positions.add(new double[]{
+                            base[0] + (i - played.size() / 2.0) * 16, base[1]
+                    });
                 }
                 animateGhostsToDeck(positions, this::updateUI);
             } else {

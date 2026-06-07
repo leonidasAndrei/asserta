@@ -56,17 +56,18 @@ public class Game {
         state.setPhase(GamePhase.PLAYING);
 
         Player currentPlayer = state.getCurrentPlayer();
-
-        for (Card c : cardsPlayed) {
-            currentPlayer.removeCard(c);
-        }
+        for (Card c : cardsPlayed) currentPlayer.removeCard(c);
 
         state.getTableCards().addAll(cardsPlayed);
         state.setLastCardsPlayedCount(cardsPlayed.size());
         state.setLastClaimer(currentPlayer);
         state.addNumberOfTurns();
 
-        if (state.getTableCards().size() >= 20) {
+        boolean tableFull  = state.getTableCards().size() >= 20;
+        boolean handsEmpty = state.getActivePlayers().stream()
+                .allMatch(p -> p.getHand().isEmpty());
+
+        if (tableFull || handsEmpty) {
             startNewRound();
             return;
         }
