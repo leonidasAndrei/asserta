@@ -63,16 +63,28 @@ public class Game {
         state.setLastClaimer(currentPlayer);
         state.addNumberOfTurns();
 
-        boolean tableFull  = state.getTableCards().size() >= 20;
-        boolean handsEmpty = state.getActivePlayers().stream()
-                .allMatch(p -> p.getHand().isEmpty());
-
-        if (tableFull || handsEmpty) {
+        if (state.getTableCards().size() >= 20) {
             startNewRound();
             return;
         }
 
         nextTurn();
+        List<Player> playersWithCards = state.getActivePlayers().stream()
+                .filter(p -> !p.isEliminated() && !p.getHand().isEmpty())
+                .toList();
+
+        if (playersWithCards.isEmpty()) {
+            startNewRound();
+            return;
+        }
+
+        if (playersWithCards.size() == 1) {
+            Player trappedPlayer = playersWithCards.get(0);
+            System.out.println("Round over! " + trappedPlayer.getUsername() + " is the last one left with cards!");
+            handlePunishment(trappedPlayer);
+            return;
+        }
+
         state.setPhase(GamePhase.WAITING);
     }
 
@@ -80,6 +92,14 @@ public class Game {
         int next = (state.getCurrentPlayerIndex() + 1) % state.getActivePlayers().size();
         state.setCurrentPlayerIndex(next);
         state.setCurrentPlayer(state.getActivePlayers().get(next));
+
+        int loops = 0;
+        while (state.getCurrentPlayer().getHand().isEmpty() && loops < state.getActivePlayers().size()) {
+            next = (next + 1) % state.getActivePlayers().size();
+            state.setCurrentPlayerIndex(next);
+            state.setCurrentPlayer(state.getActivePlayers().get(next));
+            loops++;
+        }
     }
 
     public void callBluff() {
@@ -106,7 +126,7 @@ public class Game {
 
         if (count <= 0) count = size;
 
-        for (int i = size - count; i < size; i++) { //start from lastCardsPlayed
+        for (int i = size - count; i < size; i++) {
             if (i < 0) continue;
             Card c = table.get(i);
 
@@ -121,7 +141,7 @@ public class Game {
     }
 
     private void handleAfterBluff() {
-        state.getActivePlayers().removeIf(Player::isEliminated); //remove all eliminated players
+        state.getActivePlayers().removeIf(Player::isEliminated);
 
         if (checkWinner()) return;
         startNewRound();
@@ -132,7 +152,6 @@ public class Game {
         state.setPhase(GamePhase.PICKING_POISON);
     }
 
-    // FIX: Removed Thread.sleep completely. Delays are now controlled cleanly inside the GameController layer.
     public void pickPoison(int chosenIndex) {
         Player loser = state.getLoser();
         System.out.println("The cup " + (chosenIndex + 1) + " has been chosen!");
@@ -140,13 +159,9 @@ public class Game {
         if (chosenIndex == state.getPoisonedCupIndex()) {
             System.out.println("Poisoned! " + loser.getUsername() + " loses a life!");
             loser.loseLife();
-
-            // Memory resets, new poison index rolled for the next incident
             state.resetPoisonMemory();
         } else {
             System.out.println("Safe! " + loser.getUsername() + " survives!");
-
-            // Survived -> Remember this selection as empty/unavailable for subsequent penalties
             state.setCupChosen(chosenIndex);
         }
         handleAfterBluff();
@@ -155,7 +170,6 @@ public class Game {
     private void startNewRound() {
         state.setPhase(GamePhase.NEW_ROUND);
 
-        //reset
         state.getTableCards().clear();
         state.setDeclaredRank(127);
         state.setDeclaredSymbol("");
@@ -176,6 +190,12 @@ public class Game {
 
     public List<Card> playBotTurn() {
         Player bot = state.getCurrentPlayer();
+
+        if (bot.getHand().isEmpty()) {
+            nextTurn();
+            return new ArrayList<>();
+        }
+
         Random random = new Random();
         double smartRoll = Math.random();
         List<Card> toPlay = new ArrayList<>();

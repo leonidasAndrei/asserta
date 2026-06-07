@@ -110,7 +110,10 @@ public class GameController {
             }
             case PICKING_POISON -> {
                 Player loser = game.getState().getLoser();
-                if (loser != null && !cupModal.isVisible()) showCupModal(loser);
+                if (loser != null && !cupModal.isVisible()) {
+                    cupModalTitle.setText("\"" + loser.getUsername().toUpperCase() + "\" LOST THE ROUND!\nPICK YOUR POISON...");
+                    showCupModal(loser);
+                }
             }
             case GAME_OVER -> {
                 cupModal.setVisible(false);
@@ -257,11 +260,9 @@ public class GameController {
         handBox.getChildren().clear();
         if (isSpectatingMode) return;
 
-        // show the CURRENT player's hand, not always the first human
         Player current = game.getState().getCurrentPlayer();
         if (current == null || !current.isHuman() || current.isEliminated()) return;
 
-        // clear selection when a different human's turn starts
         if (lastActiveHuman != current) {
             selectedCards.clear();
             playButton.setDisable(true);
@@ -486,9 +487,7 @@ public class GameController {
         });
     }
 
-    // ── DYNAMIC CUP MODAL LOGIC ───────────────────────────────────────────────
     private void showCupModal(Player loser) {
-        cupModalTitle.setText("\"" + loser.getUsername().toUpperCase() + "\" WAS WRONG!\nSELECT A CUP TO DRINK CONSEQUENCES:");
         cupModalOverlay.getChildren().removeIf(node -> node instanceof HBox);
 
         HBox cupsRow = new HBox(50);
@@ -605,7 +604,6 @@ public class GameController {
         }
     }
 
-
     @FXML
     public void onReturnToGameClicked() {
         isPaused = false;
@@ -637,10 +635,7 @@ public class GameController {
         });
     }
 
-    @FXML
-    public void onRematchClicked() {
-
-    }
+    @FXML public void onRematchClicked() {}
 
     // ── BOT MANAGEMENT ────────────────────────────────────────────────────────
     private void handleBotTurn() {

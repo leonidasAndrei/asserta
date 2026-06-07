@@ -28,8 +28,6 @@ public class App extends Application {
         primary.setTitle("Asserta");
         primary.setResizable(false);
 
-        // primary.initStyle(javafx.stage.StageStyle.UNDECORATED);
-
         Font.loadFont(getClass().getResourceAsStream("/com/leonidasAndrei/asserta/assets/fonts/Venice-Classic.ttf"), 12); // Venice Classic
 
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("/com/leonidasAndrei/asserta/fxml/MainMenu.fxml"));
@@ -42,20 +40,20 @@ public class App extends Application {
                 App.class.getResource("/com/leonidasAndrei/asserta/css/mystyle.css").toExternalForm()
         );
 
+        primary.fullScreenProperty().addListener((obs, oldVal, isNowFullScreen) -> {
+            fullScreenMode = isNowFullScreen;
+            if (!isNowFullScreen) {
+                primary.centerOnScreen();
+            }
+        });
+
         mainScene.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.F11 || event.getCode() == KeyCode.F) {
-                fullScreenMode = !primary.isFullScreen();
-                primary.setFullScreenExitHint("");
-                primary.setFullScreen(fullScreenMode);
-
-                if (!fullScreenMode) {
-                    primary.centerOnScreen();
-                }
+                primary.setFullScreen(!primary.isFullScreen());
             }
         });
 
         primary.setScene(mainScene);
-        primary.setFullScreenExitHint("");
         primary.setFullScreen(fullScreenMode);
         primary.show();
     }
@@ -66,9 +64,6 @@ public class App extends Application {
 
         Parent wrappedContent = createScaledWrapper(content);
         mainScene.setRoot(wrappedContent);
-
-        primary.setFullScreenExitHint("");
-        primary.setFullScreen(fullScreenMode);
     }
 
     public static void switchScene(String fxmlName, Game game) throws IOException {
@@ -84,9 +79,6 @@ public class App extends Application {
 
         Parent wrappedContent = createScaledWrapper(content);
         mainScene.setRoot(wrappedContent);
-
-        primary.setFullScreenExitHint("");
-        primary.setFullScreen(fullScreenMode);
     }
 
     /**
