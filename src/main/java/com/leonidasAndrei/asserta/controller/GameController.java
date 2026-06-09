@@ -576,7 +576,6 @@ public class GameController {
                 target.setTranslateY(-20);
             }
             AnimationHelper.runDelayed(() -> {
-                boolean livesBefore = loser.isAlive();
                 game.pickPoison(botChoice);
                 cupModal.setVisible(false);
                 processPoisonResult(loser);
