@@ -63,6 +63,6 @@ public class PlayerTest {
 
         // Ensure lives don't go negative
         player.loseLife();
-        assertEquals(0, player.getLives());
+        assertEquals(0, player.isAlive());
     }
 }

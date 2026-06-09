@@ -70,11 +70,6 @@ public class Card {
         };
     }
 
-    public static String rankToSymbol(int rank) {
-        validateRank(rank);
-        return RANKS_SYMBOLS[rank];
-    }
-
     public static String rankToSymbolFull(int rank) {
         validateRank(rank);
         return RANKS_SYMBOLS_FULL[rank];

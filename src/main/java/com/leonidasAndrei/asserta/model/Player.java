@@ -10,7 +10,7 @@ public class Player {
     private String username;
     private List<Card> hand;
     private boolean isHuman;
-    private int lives;
+    private boolean isAlive;
 
     //CONSTRUCTORS
     public Player(String username, int playerID, boolean isHuman) {
@@ -22,7 +22,7 @@ public class Player {
             this.username = username;
         }
         this.isHuman = isHuman;
-        this.lives = 1;
+        this.isAlive = true;
         this.hand = new ArrayList<>();
     }
 
@@ -52,9 +52,7 @@ public class Player {
     }
 
     public void loseLife() {
-        if (lives > 0) {
-            lives--;
-        }
+        isAlive=false;
     }
 
     public List<Card> getHand() {
@@ -62,7 +60,7 @@ public class Player {
     }
 
     public boolean isEliminated() {
-        return lives <= 0;
+        return !isAlive;
     }
 
     public int getPlayerID() {
@@ -77,7 +75,7 @@ public class Player {
         return isHuman;
     }
 
-    public int getLives() {
-        return lives;
+    public boolean isAlive() {
+        return isAlive;
     }
 }

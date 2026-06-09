@@ -553,10 +553,10 @@ public class GameController {
         chosenPane.setTranslateY(-20);
 
         AnimationHelper.runDelayed(() -> {
-            int livesBefore = loser.getLives();
+            boolean death = loser.isAlive();
             game.pickPoison(chosenIndex);
             cupModal.setVisible(false);
-            processPoisonResult(loser, livesBefore);
+            processPoisonResult(loser);
         }, 900);
     }
 
@@ -576,16 +576,16 @@ public class GameController {
                 target.setTranslateY(-20);
             }
             AnimationHelper.runDelayed(() -> {
-                int livesBefore = loser.getLives();
+                boolean livesBefore = loser.isAlive();
                 game.pickPoison(botChoice);
                 cupModal.setVisible(false);
-                processPoisonResult(loser, livesBefore);
+                processPoisonResult(loser);
             }, 1000);
         }, 1200);
     }
 
-    private void processPoisonResult(Player loser, int livesBefore) {
-        String msg = loser.getUsername().toUpperCase() + (loser.getLives() < livesBefore ? "\nLOST A LIFE!" : "\nSURVIVED!");
+    private void processPoisonResult(Player loser) {
+        String msg = loser.getUsername().toUpperCase() + (loser.isAlive() ? "\nSURVIVED!" : "\nDIED!");
         showAnnouncement(msg, () -> {
             Player stillLoser = game.getState().getLoser();
             if (stillLoser != null && game.getState().getPhase() == GamePhase.PICKING_POISON) {

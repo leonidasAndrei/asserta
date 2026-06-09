@@ -8,7 +8,6 @@ public class Deck {
 
     //ATTRIBUTES
     private List<Card> deck;
-    private int type;
 
     //CONSTRUCTORS
     //Bluff deck
@@ -19,13 +18,7 @@ public class Deck {
 
         for (int i = 0; i < 6; i++) {
             deck.add(new Card(suits[suitIndex++ % suits.length], 13)); // King
-        }
-
-        for (int i = 0; i < 6; i++) {
             deck.add(new Card(suits[suitIndex++ % suits.length], 12)); // Queen
-        }
-
-        for (int i = 0; i < 6; i++) {
             deck.add(new Card(suits[suitIndex++ % suits.length], 1)); // Ace
         }
 
@@ -37,22 +30,9 @@ public class Deck {
     //Full or Standard deck
     public Deck(int type) {
         deck = new ArrayList<>();
-        if (type != 0 && type != 1) {
-            throw new IllegalArgumentException("Type must be 0 (full deck) or 1 (standard deck)");
-        } else {
-            this.type = type;
-
-            // Standard 52 cards
-            for (Card.Suit suit : Card.Suit.values()) {
-                for (int rank = 1; rank <= 13; rank++) {
-                    deck.add(new Card(suit, rank));
-                }
-            }
-
-            // Full 54 cards
-            if (type == 0) {
-                deck.add(new Card(null, 0));
-                deck.add(new Card(null, 0));
+        for (Card.Suit suit : Card.Suit.values()) {
+            for (int rank = 1; rank <= 13; rank++) {
+                deck.add(new Card(suit, rank));
             }
         }
     }
