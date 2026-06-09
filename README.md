@@ -17,7 +17,7 @@ Asserta is a game of psychological warfare. Survival depends on your ability to 
 
 ### 2. Turn Actions
 On your turn, you have two choices:
-* **Bluff / Play:** Place 1 to 3 cards face-down and declare that they match the current table round (e.g., King, Queen, or Ace). *You do not have to tell the truth.*
+* **Bluff / Play:** Place 1 to 3 cards face-down and declare that they match the current table round (e.g., King, Queen, or Ace). *You are not obligated to tell the truth.*
 * **Call Bluff!:** Accuse the previous player of lying about their cards.
 
 ### 3. The Consequence
