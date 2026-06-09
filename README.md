@@ -126,4 +126,15 @@ asserta/
   <sub>Lead Developer</sub>
 </p>
 
+ <p align="center">
+  <a href="https://github.com/macchionigiada">
+    <img src="https://github.com/macchionigiada.png" width="120px" style="border-radius: 50%; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+    <br />
+    <b>macchionigiada</b>
+  </a>
+  <br />
+  <sub>Developer</sub>
+</p>
+
+
 ---
