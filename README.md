@@ -114,7 +114,7 @@ asserta/
    - [Arcade](https://www.dafont.com/arcade-ya.font)
 ---
 
-## Author & Maintainer
+## Contributors
 
 <p align="center">
   <a href="https://github.com/leonidasAndrei">
@@ -123,7 +123,7 @@ asserta/
     <b>leonidasAndrei</b>
   </a>
   <br />
-  <sub>Lead Developer</sub>
+  <sub>Developer</sub>
 </p>
 
  <p align="center">
